@@ -15,8 +15,8 @@ PG_CONN = {
     'host': 'localhost',
     'port': 5432,
     'dbname': 'mydb',
-    'user': 'myuser',
-    'password': 'mypassword'
+    'user': 'postgres',
+    'password': 'postgres'
 }
 INPUT_FILE = 'bigfile.json'   # path to original JSON (root is array)
 BATCH_SIZE = 5000             # thử 5k, tăng/giảm tuỳ kích thước record và memory
@@ -56,7 +56,7 @@ def main():
                 conn.commit()
             total += len(batch)
             elapsed = time.time() - t0
-            print(f"Inserted {total} rows — last batch {len(batch)} — {elapsed:.1f}s elapsed")
+            # print(f"Inserted {total} rows — last batch {len(batch)} — {elapsed:.1f}s elapsed")
             batch = []
 
     # insert remaining
