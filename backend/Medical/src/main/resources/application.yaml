@@ -1,0 +1,18 @@
+server:
+  port: 8080
+spring:
+  application:
+    name: Medical-backend
+  datasource:
+    url: jdbc:postgresql://localhost:5432/mydb
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update   # hoặc validate / create / create-drop tùy nhu cầu
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: true
