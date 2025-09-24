@@ -1,0 +1,18 @@
+:root {
+  --primary-color: linear-gradient(90deg, #007bff, #a020f0);
+  --primary-color-dark: linear-gradient(90deg, #6a11cb, #2575fc);
+  --color-v3-grey-4: 206, 206, 234;
+  --color-gray-hover: #E0E0E7;
+  --color-gray-hover-light: #f1f1f6;
+  --color-gray-hover-dark: rgb(192, 192, 198);
+  --white:#fff;
+  --black:#000;
+}
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+html {
+  font-size: 62.5%;
+}
