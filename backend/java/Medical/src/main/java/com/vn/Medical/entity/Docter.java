@@ -15,7 +15,7 @@ import lombok.experimental.FieldDefaults;
 @Data
 public class Docter {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
+    @GeneratedValue(strategy =  GenerationType.UUID)
     String id;
     String gmail;
     String password;
