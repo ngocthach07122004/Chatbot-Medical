@@ -36,6 +36,42 @@ services:
     depends_on:
       - postgresDoctor
       - postgresPatient
+  kafkaMessage:
+    image: confluentinc/cp-kafka:8.1.0
+    container_name: kafkaMessage
+    hostname: kafkaMessage
+    ports:
+      - "9092:9092"   # client bootstrap
+      - "9093:9093"   # controller listener
+    environment:
+      KAFKA_KRAFT_MODE: "true"
+      KAFKA_PROCESS_ROLES: "controller,broker"
+      KAFKA_NODE_ID: "1"
+      KAFKA_CONTROLLER_QUORUM_VOTERS: "1@kafkaMessage:9093"
+      KAFKA_LISTENERS: "CONTROLLER://0.0.0.0:9093,PLAINTEXT://0.0.0.0:9092"
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT"
+      KAFKA_CONTROLLER_LISTENER_NAMES: "CONTROLLER"
+      # KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT://kafka1:9092"
+      KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT://localhost:9092"
+      KAFKA_LOG_DIRS: "/var/lib/kafka/data"
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+  kafka-init:
+    image: confluentinc/cp-kafka:8.1.0
+    depends_on:
+      - kafkaMessage
+    entrypoint: ["/bin/sh","-c"]
+    command:
+      - |
+        echo "Waiting for Kafka to be ready..."
+        sleep 20
+        for topic in HistoryChat-topic; do
+          /usr/bin/kafka-topics --create --if-not-exists \
+            --bootstrap-server kafkaMessage:9092 \
+            --replication-factor 1 --partitions 3 --topic $topic
+        done
+        tail -f /dev/null
 volumes:
   postgres_data_doctor:
   postgres_data_patient:
