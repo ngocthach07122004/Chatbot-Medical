@@ -1,15 +1,14 @@
 package com.vn.Medical.controller;
 
+import com.vn.Medical.dto.request.HistoryChatRequest;
+import com.vn.Medical.dto.response.ApiResponse;
 import com.vn.Medical.entity.HistoryChat;
 import com.vn.Medical.service.HistoryChatService;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -28,4 +27,10 @@ public class HistoryChatController {
     {
         return historyChatService.getHistoryChat(doctorId,patientId);
     }
+
+    @PostMapping("/create")
+    public ApiResponse<HistoryChat> createHistoryChat(@RequestBody HistoryChatRequest request){
+         return ApiResponse.<HistoryChat>builder().code("200").message("success").entity(historyChatService.createHistoryChat(request)).build();
+    }
 }
+
