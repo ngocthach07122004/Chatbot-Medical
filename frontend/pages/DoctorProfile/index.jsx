@@ -6,9 +6,11 @@ import classNames from "classnames/bind";
 const cx = classNames.bind(styles);
 
 const DoctorProfile = () => {
-    // Static mock data (replace with real data later)
+    // UI-only mock data (will be replaced by backend integration)
     const [doctor, setDoctor] = useState({
-        name: "Dr. Nguyen Van A",
+        FullName: "Dr. Nguyen Van A",
+        gmail: "dr.nguyenvana@example.com",
+        Age: 40,
         title: "Cardiologist",
         avatar: "",
         rating: 4.9,
@@ -16,7 +18,6 @@ const DoctorProfile = () => {
         hospital: "HCMC University Hospital",
         years: 12,
         patients: 2400,
-        email: "dr.nguyenvana@example.com",
         phone: "+84 912 345 678",
         location: "700000, District 1, Ho Chi Minh City",
         specialties: ["Cardiology", "Hypertension", "Preventive Medicine"],
@@ -31,8 +32,11 @@ const DoctorProfile = () => {
     const openEdit = () => {
         setFormData({
             ...doctor,
-            specialtiesText: doctor.specialties.join(", "),
-            languagesText: doctor.languages.join(", "),
+            name: doctor.FullName,
+            email: doctor.gmail,
+            age: doctor.Age,
+            specialtiesText: (doctor.specialties || []).join(", "),
+            languagesText: (doctor.languages || []).join(", "),
         });
         setIsEditOpen(true);
     };
@@ -57,11 +61,12 @@ const DoctorProfile = () => {
 
         setDoctor((prev) => ({
             ...prev,
-            name: formData.name || prev.name,
+            FullName: formData.name || prev.FullName,
+            gmail: formData.email || prev.gmail,
+            Age: Number(formData.age ?? prev.Age) || prev.Age,
             title: formData.title || prev.title,
             hospital: formData.hospital || prev.hospital,
             years: Number(formData.years ?? prev.years) || prev.years,
-            email: formData.email || prev.email,
             phone: formData.phone || prev.phone,
             location: formData.location || prev.location,
             about: formData.about || prev.about,
@@ -130,7 +135,7 @@ const DoctorProfile = () => {
         // Header: Name
         doc.setFont("helvetica", "bold");
         doc.setFontSize(22);
-        doc.text(doctor.name || "Doctor", margin, y);
+        doc.text(doctor.FullName || "Doctor", margin, y);
         y += baseLine * 1.5;
 
         // Subtitle: Title • Hospital
@@ -153,9 +158,10 @@ const DoctorProfile = () => {
         y += baseLine * 1.5;
 
         // Contact
-        if (doctor.email || doctor.phone || doctor.location) {
+        if (doctor.gmail || doctor.phone || doctor.location) {
             heading("Contact");
-            if (doctor.email) { ensureSpace(baseLine); doc.text(`Email: ${doctor.email}`, margin, y); y += baseLine; }
+            if (doctor.gmail) { ensureSpace(baseLine); doc.text(`Email: ${doctor.gmail}`, margin, y); y += baseLine; }
+            if (doctor.Age != null) { ensureSpace(baseLine); doc.text(`Age: ${doctor.Age}`, margin, y); y += baseLine; }
             if (doctor.phone) { ensureSpace(baseLine); doc.text(`Phone: ${doctor.phone}`, margin, y); y += baseLine; }
             if (doctor.location) { ensureSpace(baseLine); doc.text(`Location: ${doctor.location}`, margin, y); y += baseLine; }
             y += 6;
@@ -188,7 +194,7 @@ const DoctorProfile = () => {
         ];
         bullets(experienceItems);
 
-        const base = toSafeFileName(doctor.name || "Doctor_Profile");
+        const base = toSafeFileName(doctor.FullName || "Doctor_Profile");
         doc.save(`${base}_CV.pdf`);
     };
 
@@ -200,7 +206,7 @@ const DoctorProfile = () => {
                         <i className="fa-solid fa-user-doctor"></i>
                     </div>
                     <div className={cx("identity")}>
-                        <h1 className={cx("name")}>{doctor.name}</h1>
+                        <h1 className={cx("name")}>{doctor.FullName}</h1>
                         <p className={cx("title")}>{doctor.title} • {doctor.hospital}</p>
                         <div className={cx("rating")}>
                             <i className="fa-solid fa-star"></i>
@@ -260,7 +266,8 @@ const DoctorProfile = () => {
                         Contact
                     </h2>
                     <ul className={cx("contact_list")}>
-                        <li><i className="fa-solid fa-envelope"></i>{doctor.email}</li>
+                        <li><i className="fa-solid fa-envelope"></i>{doctor.gmail}</li>
+                        <li><i className="fa-solid fa-user"></i>Age: {doctor.Age}</li>
                         <li><i className="fa-solid fa-mobile-screen"></i>{doctor.phone}</li>
                         <li><i className="fa-solid fa-location-dot"></i>{doctor.location}</li>
                     </ul>
@@ -311,7 +318,7 @@ const DoctorProfile = () => {
                         <form className={cx("modal_body")} onSubmit={handleSave}>
                             <div className={cx("form_grid")}>
                                 <div className={cx("form_group")}>
-                                    <label>Name</label>
+                                    <label>Full Name</label>
                                     <input name="name" value={formData.name || ""} onChange={handleChange} />
                                 </div>
                                 <div className={cx("form_group")}>
@@ -325,6 +332,10 @@ const DoctorProfile = () => {
                                 <div className={cx("form_group")}>
                                     <label>Years</label>
                                     <input name="years" type="number" min="0" value={formData.years ?? doctor.years} onChange={handleChange} />
+                                </div>
+                                <div className={cx("form_group")}>
+                                    <label>Age</label>
+                                    <input name="age" type="number" min="0" value={formData.age ?? doctor.Age} onChange={handleChange} />
                                 </div>
                                 <div className={cx("form_group")}>
                                     <label>Email</label>

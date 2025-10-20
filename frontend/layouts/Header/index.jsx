@@ -15,6 +15,11 @@ const navObjects = [
     'name': 'Chatbot',
     'url': 'chatbot'
   }
+  , {
+    'id': 3,
+    'name': 'Patients',
+    'url': 'patients'
+  }
 ]
 export default function Header() {
   const navigate = useNavigate();
