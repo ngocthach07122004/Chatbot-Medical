@@ -1,18 +1,18 @@
 package com.vn.Medical.mapper;
 
-import com.vn.Medical.dto.request.DocterLogin;
-import com.vn.Medical.entity.Docter;
+import com.vn.Medical.dto.request.DoctorLogin;
+import com.vn.Medical.entity.Doctor;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
 @Mapper(componentModel = "spring")
-public interface DocterMapper {
+public interface DoctorMapper {
     @Mapping(target = "password",ignore = true)
     @Mapping(target = "id", ignore = true)
-    Docter toDocter(Docter docter);
+    Doctor toDoctor(Doctor Doctor);
 
     @Mapping(target = "password",ignore = true)
-    Docter fromDocterRequestToDoctor(DocterLogin docterLogin);
-    void updateDocter(@MappingTarget Docter docter, Docter docterUpdate);
+    Doctor fromDoctorRequestToDoctor(DoctorLogin DoctorLogin);
+    void updateDoctor(@MappingTarget Doctor Doctor, Doctor DoctorUpdate);
 }

@@ -7,7 +7,7 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @AllArgsConstructor
 @FieldDefaults(level =  AccessLevel.PRIVATE)
-public class DocterLogin {
+public class DoctorLogin {
     String gmail;
     String password;
 }

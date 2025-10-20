@@ -1,5 +1,6 @@
 package com.vn.Medical;
 
+import com.vn.Medical.config.DatabaseCreator;
 import io.github.cdimascio.dotenv.Dotenv;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -9,12 +10,15 @@ public class MedicalApplication {
 
 	public static void main(String[] args) {
         Dotenv dotenv = Dotenv.load(); // load .env ở project root
-        System.setProperty("DB_HOST", dotenv.get("DB_HOST_DOCTER"));
-        System.setProperty("DB_PORT", dotenv.get("POSTGRES_PORT_DOCTER"));
-        System.setProperty("DB_NAME", dotenv.get("POSTGRES_DB_DOCTER"));
-        System.setProperty("DB_USER", dotenv.get("POSTGRES_USER_DOCTER"));
-        System.setProperty("DB_PASSWORD", dotenv.get("POSTGRES_PASSWORD_DOCTER"));
-		SpringApplication.run(MedicalApplication.class, args);
+        System.setProperty("DB_HOST", dotenv.get("DB_HOST_DOCTOR"));
+        System.setProperty("DB_PORT", dotenv.get("POSTGRES_PORT_DOCTOR"));
+        System.setProperty("DB_NAME", dotenv.get("POSTGRES_DB_DOCTOR"));
+        System.setProperty("DB_USER", dotenv.get("POSTGRES_USER_DOCTOR"));
+        System.setProperty("DB_PASSWORD", dotenv.get("POSTGRES_PASSWORD_DOCTOR"));
+        SpringApplication application = new SpringApplication(MedicalApplication.class);
+        application.addInitializers(new DatabaseCreator()); // ✅ chạy trước Hibernate
+        application.run(args);
+//		SpringApplication.run(MedicalApplication.class, args);
 	}
 
 }

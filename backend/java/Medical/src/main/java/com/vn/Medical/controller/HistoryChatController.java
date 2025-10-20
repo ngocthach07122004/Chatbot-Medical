@@ -17,13 +17,13 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/historyChat")
-@FieldDefaults(level = AccessLevel.PRIVATE )
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class HistoryChatController {
-    private final HistoryChatService historyChatService;
+   HistoryChatService historyChatService;
     @GetMapping("/{doctorId}/{patientId}")
     public Map<LocalDate, List<HistoryChat>> getHistoryChatsByDoctorIdAndPatientId(
-            @PathVariable(name = "doctorId") String doctorId,
+            @PathVariable(name = "doctorId") Long doctorId,
             @PathVariable(name = "patientId") Long patientId  )
     {
         return historyChatService.getHistoryChat(doctorId,patientId);

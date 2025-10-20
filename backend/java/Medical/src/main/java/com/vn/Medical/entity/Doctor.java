@@ -1,11 +1,11 @@
 package com.vn.Medical.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @AllArgsConstructor
@@ -13,13 +13,14 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Data
-public class Docter {
+public class Doctor {
     @Id
     @GeneratedValue(strategy =  GenerationType.IDENTITY)
-            Long id;
+    Long id;
     String gmail;
     String password;
     int age;
     String fullName;
-
+//    @OneToMany(mappedBy = "doctorId", cascade = CascadeType.ALL, orphanRemoval = true)
+//    private Set<DoctorPatientChat> dockerPatientChats = new HashSet<>();
 }

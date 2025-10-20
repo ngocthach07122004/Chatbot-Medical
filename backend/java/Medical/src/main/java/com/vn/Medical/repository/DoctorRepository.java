@@ -1,6 +1,6 @@
 package com.vn.Medical.repository;
 
-import com.vn.Medical.entity.Docter;
+import com.vn.Medical.entity.Doctor;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 @Repository
-public interface DocterRepository extends JpaRepository<Docter,Long> {
+public interface DoctorRepository extends JpaRepository<Doctor,Long> {
 
-    Optional<Docter> findByGmail (String gmail);
+    Optional<Doctor> findByGmail (String gmail);
 }

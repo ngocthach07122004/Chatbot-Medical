@@ -2,9 +2,14 @@ package com.vn.Medical.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.vn.Medical.dto.request.HistoryChatRequest;
+import com.vn.Medical.entity.DoctorPatientChat;
 import com.vn.Medical.entity.HistoryChat;
+import com.vn.Medical.repository.DoctorPatientChatRepository;
 import com.vn.Medical.repository.HistoryChatRepository;
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -12,23 +17,26 @@ import java.util.*;
 
 @Service
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class HistoryChatService {
-    private final HistoryChatRepository historyChatRepository ;
-    private final DoctorPatientChatService doctorPatientChatService;
-    private final ObjectMapper objectMapper;
+     HistoryChatRepository historyChatRepository ;
+     DoctorPatientChatService doctorPatientChatService;
+     ObjectMapper objectMapper;
+     DoctorPatientChatRepository doctorPatientChatRepository;
 
-    public HistoryChat saveHistoryChat (String jsonString ) {
-         try {
-             JsonNode node = objectMapper.readTree(jsonString);
-             HistoryChat historyChat = new HistoryChat();
-             historyChat.setData(node);
-             return historyChatRepository.save(historyChat);
-         }
-         catch (Exception e) {
-             throw new RuntimeException(e);
-         }
+    public HistoryChat createHistoryChat (HistoryChatRequest request) {
+        HistoryChat historyChat = new HistoryChat();
+        historyChat.setData(request.getData());
+        historyChatRepository.save(historyChat);
+        DoctorPatientChat doctorPatientChat = new DoctorPatientChat();
+        doctorPatientChat.setDoctorId(request.getDoctorId());
+        doctorPatientChat.setHistoryChatId(historyChat.getId());
+        doctorPatientChat.setPatientId(request.getPatientId());
+        doctorPatientChatRepository.save(doctorPatientChat);
+        return historyChat;
+
     }
-    public Map<LocalDate,List<HistoryChat>> getHistoryChat (String doctorId, Long patientId) {
+    public Map<LocalDate,List<HistoryChat>> getHistoryChat (Long doctorId, Long patientId) {
         List<Object[]> hictoryChats = doctorPatientChatService.getHistoryChatIdByDoctorAndPatient(doctorId,patientId);
         Map<LocalDate,List<HistoryChat>> hictoryChatResult = new HashMap<>();
         if(hictoryChats.isEmpty()) {

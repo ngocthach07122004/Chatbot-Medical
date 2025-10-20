@@ -13,7 +13,7 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class DoctorPatientChatService {
     private final DoctorPatientChatRepository doctorPatientChatRepository;
-    public List<Object[]> getHistoryChatIdByDoctorAndPatient (String doctorId, Long patientId) {
+    public List<Object[]> getHistoryChatIdByDoctorAndPatient (Long doctorId, Long patientId) {
          return doctorPatientChatRepository.findHistoryChatsByDoctorAndPatient(doctorId,patientId);
     }
 }
