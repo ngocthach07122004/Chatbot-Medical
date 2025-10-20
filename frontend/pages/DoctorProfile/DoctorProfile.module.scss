@@ -271,6 +271,119 @@
     border-color: rgba(0, 123, 255, 0.3);
 }
 
+/* Modal */
+.modal_overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(10, 10, 10, 0.35);
+    backdrop-filter: blur(2px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    padding: 24px;
+}
+
+.modal {
+    width: 100%;
+    max-width: 720px;
+    background: rgba(255, 255, 255, 0.98);
+    border: 1px solid rgba(67, 46, 134, 0.12);
+    border-radius: 16px;
+    box-shadow: 0 16px 40px rgba(67, 46, 134, 0.25);
+    overflow: hidden;
+}
+
+.modal_header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 14px 18px;
+    border-bottom: 1px solid rgba(67, 46, 134, 0.08);
+}
+
+.modal_header h3 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: #222;
+}
+
+.icon_btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    border: 1px solid rgba(67, 46, 134, 0.12);
+    background: white;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal_body {
+    padding: 16px 18px 18px;
+}
+
+.form_grid {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 12px;
+}
+
+.form_group {
+    grid-column: span 6;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.form_group.wide {
+    grid-column: span 12;
+}
+
+.form_group label {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #333;
+}
+
+.form_group input,
+.form_group textarea {
+    border: 2px solid #e6e6f0;
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-size: 1.4rem;
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form_group input:focus,
+.form_group textarea:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.12);
+}
+
+.modal_actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 10px 18px 18px;
+}
+
+@media (max-width: 768px) {
+    .modal {
+        max-width: 96vw;
+    }
+
+    .form_group {
+        grid-column: span 12;
+    }
+}
+
 /* Responsive */
 @media (max-width: 992px) {
     .hero_card {

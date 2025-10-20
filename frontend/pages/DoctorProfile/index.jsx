@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import styles from "./DoctorProfile.module.scss";
 import classNames from "classnames/bind";
 
@@ -6,7 +6,7 @@ const cx = classNames.bind(styles);
 
 const DoctorProfile = () => {
     // Static mock data (replace with real data later)
-    const doctor = {
+    const [doctor, setDoctor] = useState({
         name: "Dr. Nguyen Van A",
         title: "Cardiologist",
         avatar: "",
@@ -22,6 +22,52 @@ const DoctorProfile = () => {
         languages: ["Vietnamese", "English"],
         about:
             "Experienced cardiologist focusing on preventive care and patient-centric treatment plans. Passionate about improving heart health through lifestyle changes and evidence-based medicine.",
+    });
+
+    const [isEditOpen, setIsEditOpen] = useState(false);
+    const [formData, setFormData] = useState({});
+
+    const openEdit = () => {
+        setFormData({
+            ...doctor,
+            specialtiesText: doctor.specialties.join(", "),
+            languagesText: doctor.languages.join(", "),
+        });
+        setIsEditOpen(true);
+    };
+
+    const closeEdit = () => setIsEditOpen(false);
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setFormData((prev) => ({ ...prev, [name]: value }));
+    };
+
+    const handleSave = (e) => {
+        e.preventDefault();
+        const specialties = (formData.specialtiesText || "")
+            .split(",")
+            .map((s) => s.trim())
+            .filter(Boolean);
+        const languages = (formData.languagesText || "")
+            .split(",")
+            .map((s) => s.trim())
+            .filter(Boolean);
+
+        setDoctor((prev) => ({
+            ...prev,
+            name: formData.name || prev.name,
+            title: formData.title || prev.title,
+            hospital: formData.hospital || prev.hospital,
+            years: Number(formData.years ?? prev.years) || prev.years,
+            email: formData.email || prev.email,
+            phone: formData.phone || prev.phone,
+            location: formData.location || prev.location,
+            about: formData.about || prev.about,
+            specialties,
+            languages,
+        }));
+        setIsEditOpen(false);
     };
 
     return (
@@ -127,10 +173,70 @@ const DoctorProfile = () => {
             </section>
 
             <section className={cx("actions_row")}>
-                <button className={cx("btn", "primary")}>Edit Profile</button>
-                <button className={cx("btn", "secondary")}>Download CV</button>
-                <button className={cx("btn")}>Contact</button>
+                <button className={cx("btn", "primary")} onClick={openEdit}>Edit Profile</button>
+                <button className={cx("btn", "secondary")} onClick={() => window.alert('Downloading CV...')}>Download CV</button>
             </section>
+
+            {isEditOpen && (
+                <div className={cx("modal_overlay")}>
+                    <div className={cx("modal")}>
+                        <div className={cx("modal_header")}>
+                            <h3><i className="fa-solid fa-user-pen"></i>Edit Profile</h3>
+                            <button className={cx("icon_btn")} onClick={closeEdit} aria-label="Close">
+                                <i className="fa-solid fa-xmark"></i>
+                            </button>
+                        </div>
+                        <form className={cx("modal_body")} onSubmit={handleSave}>
+                            <div className={cx("form_grid")}>
+                                <div className={cx("form_group")}>
+                                    <label>Name</label>
+                                    <input name="name" value={formData.name || ""} onChange={handleChange} />
+                                </div>
+                                <div className={cx("form_group")}>
+                                    <label>Title</label>
+                                    <input name="title" value={formData.title || ""} onChange={handleChange} />
+                                </div>
+                                <div className={cx("form_group")}>
+                                    <label>Hospital</label>
+                                    <input name="hospital" value={formData.hospital || ""} onChange={handleChange} />
+                                </div>
+                                <div className={cx("form_group")}>
+                                    <label>Years</label>
+                                    <input name="years" type="number" min="0" value={formData.years ?? doctor.years} onChange={handleChange} />
+                                </div>
+                                <div className={cx("form_group")}>
+                                    <label>Email</label>
+                                    <input name="email" type="email" value={formData.email || ""} onChange={handleChange} />
+                                </div>
+                                <div className={cx("form_group")}>
+                                    <label>Phone</label>
+                                    <input name="phone" value={formData.phone || ""} onChange={handleChange} />
+                                </div>
+                                <div className={cx("form_group", "wide")}>
+                                    <label>Location</label>
+                                    <input name="location" value={formData.location || ""} onChange={handleChange} />
+                                </div>
+                                <div className={cx("form_group", "wide")}>
+                                    <label>Specialties (comma-separated)</label>
+                                    <input name="specialtiesText" value={formData.specialtiesText || ""} onChange={handleChange} />
+                                </div>
+                                <div className={cx("form_group", "wide")}>
+                                    <label>Languages (comma-separated)</label>
+                                    <input name="languagesText" value={formData.languagesText || ""} onChange={handleChange} />
+                                </div>
+                                <div className={cx("form_group", "wide")}>
+                                    <label>About</label>
+                                    <textarea name="about" rows={4} value={formData.about || ""} onChange={handleChange} />
+                                </div>
+                            </div>
+                            <div className={cx("modal_actions")}>
+                                <button type="button" className={cx("btn")} onClick={closeEdit}>Cancel</button>
+                                <button type="submit" className={cx("btn", "primary")}>Save Changes</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
