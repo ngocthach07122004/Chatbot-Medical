@@ -43,35 +43,60 @@ services:
     ports:
       - "9092:9092"   # client bootstrap
       - "9093:9093"   # controller listener
+      - "9094:9094"
     environment:
       KAFKA_KRAFT_MODE: "true"
       KAFKA_PROCESS_ROLES: "controller,broker"
       KAFKA_NODE_ID: "1"
       KAFKA_CONTROLLER_QUORUM_VOTERS: "1@kafkaMessage:9093"
-      KAFKA_LISTENERS: "CONTROLLER://0.0.0.0:9093,PLAINTEXT://0.0.0.0:9092"
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT"
       KAFKA_CONTROLLER_LISTENER_NAMES: "CONTROLLER"
-      # KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT://kafka1:9092"
-      KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT://localhost:9092"
+
+      KAFKA_LISTENERS: "CONTROLLER://0.0.0.0:9093,PLAINTEXT://0.0.0.0:9092,PLAINTEXT_EXTERNAL://:9094"
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_EXTERNAL:PLAINTEXT"
+      
+      KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT://kafkaMessage:9092,PLAINTEXT_EXTERNAL://localhost:9094"
+      # KAFKA_LISTENERS: "PLAINTEXT_INTERNAL://0.0.0.0:9093,PLAINTEXT_EXTERNAL://0.0.0.0:9092,CONTROLLER://0.0.0.0:9094"
+      # KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT_INTERNAL://kafkaMessage:9093,PLAINTEXT_EXTERNAL://localhost:9092"
+      # KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "PLAINTEXT_INTERNAL:PLAINTEXT,PLAINTEXT_EXTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT"
+      # KAFKA_INTER_BROKER_LISTENER_NAME: "PLAINTEXT_INTERNAL"
+
       KAFKA_LOG_DIRS: "/var/lib/kafka/data"
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
   kafka-init:
     image: confluentinc/cp-kafka:8.1.0
     depends_on:
       - kafkaMessage
-    entrypoint: ["/bin/sh","-c"]
-    command:
-      - |
-        echo "Waiting for Kafka to be ready..."
-        sleep 20
-        for topic in HistoryChat-topic; do
-          /usr/bin/kafka-topics --create --if-not-exists \
-            --bootstrap-server kafkaMessage:9092 \
-            --replication-factor 1 --partitions 3 --topic $topic
-        done
-        tail -f /dev/null
+    # entrypoint: ["/bin/sh","-c"]
+    volumes:
+    - ./Shellscript:/Shellscript
+    entrypoint: ["/bin/sh","/Shellscript/init-topics.sh"]
+    
+    # command:
+    #   - |
+    #     echo "Waiting for Kafka to be ready..."
+    #     sleep 20
+    #     for topic in HistoryChatTopic; do
+    #       echo "Creating topic: $topic"
+    #       /usr/bin/kafka-topics --create --if-not-exists \
+    #         --bootstrap-server kafkaMessage:9092 \
+    #         --replication-factor 1 --partitions 3 --topic "$topic"
+    #     done
+    #     tail -f /dev/null
+
 volumes:
   postgres_data_doctor:
   postgres_data_patient:
+
+
+# |
+#         echo "Waiting for Kafka to be ready..."
+#         sleep 20
+#         for topic in student-scores student-activity; do
+#           /usr/bin/kafka-topics --create --if-not-exists \
+#             --bootstrap-server kafka1:9092 \
+#             --replication-factor 1 --partitions 3 --topic $topic
+#         done
+#         tail -f /dev/null
