@@ -9,6 +9,7 @@ import (
 func RouterConfig(router *gin.Engine, controllerCollection *initBean.ControllerCollection) {
 	patientRouter := router.Group("/patient")
 	pathology := router.Group("/pathology")
+	chatHistory := router.Group("/chatHistory")
 	{
 		patientRouter.POST("/create", controllerCollection.PatientRepo.CreatePatient)
 		patientRouter.GET("/:id", controllerCollection.PatientRepo.GetPatientById)
@@ -16,5 +17,8 @@ func RouterConfig(router *gin.Engine, controllerCollection *initBean.ControllerC
 	}
 	{
 		pathology.POST("/create", controllerCollection.PatientRepo.CreatePathology)
+	}
+	{
+		chatHistory.GET("/all", controllerCollection.DoctorPatientChatRepo.GetAllDoctorPatientMessage)
 	}
 }

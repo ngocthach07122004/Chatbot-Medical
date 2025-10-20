@@ -3,6 +3,7 @@ package main
 import (
 	"PatientService/config"
 	"PatientService/internal/initBean"
+	"PatientService/internal/kafkaMessage"
 	"PatientService/routers"
 	"os"
 
@@ -17,5 +18,9 @@ func main() {
 	Controller := initBean.ControllerCollect
 	routers.RouterConfig(router, Controller)
 	servicePort := ": " + os.Getenv("PATIENT_PORT")
+	// Kafka message
+	initBean.InitKafka()
+	kafkaAttribute := initBean.KafkaAttributeValue
+	go kafkaMessage.ConsumeHistoryChatTopic(DB, kafkaAttribute)
 	router.Run(servicePort)
 }
