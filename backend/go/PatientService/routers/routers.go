@@ -1,12 +1,12 @@
-package router
+package routers
 
 import (
-	"PatientService/internal/helper"
+	"PatientService/internal/initBean"
 
 	"github.com/gin-gonic/gin"
 )
 
-func RouterConfig(router *gin.Engine, controllerCollection *helper.ControllerCollection) {
+func RouterConfig(router *gin.Engine, controllerCollection *initBean.ControllerCollection) {
 	patientRouter := router.Group("/patient")
 	pathology := router.Group("/pathology")
 	{

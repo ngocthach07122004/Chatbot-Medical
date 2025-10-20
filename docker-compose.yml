@@ -34,7 +34,8 @@ services:
     ports:
       - '${PGADMIN_PORT}:80'
     depends_on:
-      - postgres_data_docter
+      - postgresDocter
+      - postgresPatient
 volumes:
   postgres_data_docter:
   postgres_data_patient:

@@ -1,4 +1,4 @@
-package helper
+package initBean
 
 import (
 	"PatientService/internal/repository"
@@ -6,14 +6,14 @@ import (
 	"gorm.io/gorm"
 )
 
-var controllerCollection *ControllerCollection
+var ControllerCollect *ControllerCollection
 
 type ControllerCollection struct {
 	PatientRepo *repository.PatientProfileRepo
 }
 
 func InitControllerCollection(db *gorm.DB) {
-	controllerCollection = &ControllerCollection{
+	ControllerCollect = &ControllerCollection{
 		PatientRepo: &repository.PatientProfileRepo{
 			DB: db,
 		},
