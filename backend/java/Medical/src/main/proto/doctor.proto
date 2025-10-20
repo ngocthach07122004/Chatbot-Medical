@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package user;
+
+option java_multiple_files = true;
+option java_package = "com.vn.Medical.grpc.historyChatGrpc";
+option java_outer_classname = "HistoryChatGrpc";
+
+service HistoryChatService {
+  rpc GetHistoryChat (HistoryChatRequest) returns (HistoryChatResponse);
+}
+
+message HistoryChatRequest {
+  string id = 1;
+}
+
+message HistoryChatResponse {
+  string id = 1;
+}
+
+

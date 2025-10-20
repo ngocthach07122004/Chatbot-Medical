@@ -3,6 +3,7 @@ package com.vn.Medical.service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vn.Medical.dto.request.HistoryChatRequest;
+import com.vn.Medical.dto.response.DoctorPatientChatDTO;
 import com.vn.Medical.entity.DoctorPatientChat;
 import com.vn.Medical.entity.HistoryChat;
 import com.vn.Medical.repository.DoctorPatientChatRepository;
@@ -10,6 +11,7 @@ import com.vn.Medical.repository.HistoryChatRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -23,6 +25,7 @@ public class HistoryChatService {
      DoctorPatientChatService doctorPatientChatService;
      ObjectMapper objectMapper;
      DoctorPatientChatRepository doctorPatientChatRepository;
+     KafkaTemplate<Long, DoctorPatientChatDTO> kafkaTemplate;
 
     public HistoryChat createHistoryChat (HistoryChatRequest request) {
         HistoryChat historyChat = new HistoryChat();
@@ -33,6 +36,12 @@ public class HistoryChatService {
         doctorPatientChat.setHistoryChatId(historyChat.getId());
         doctorPatientChat.setPatientId(request.getPatientId());
         doctorPatientChatRepository.save(doctorPatientChat);
+        DoctorPatientChatDTO doctorPatientChatDTO = DoctorPatientChatDTO.builder()
+                .doctorId(doctorPatientChat.getDoctorId())
+                .historyChatId(doctorPatientChat.getHistoryChatId())
+                .patientId(doctorPatientChat.getPatientId())
+                .build();
+        kafkaTemplate.send("HistoryChatTopic",doctorPatientChatDTO);
         return historyChat;
 
     }
