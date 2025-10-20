@@ -1,17 +1,17 @@
 version: '3.8'
 services:
-  postgresDocter:
+  postgresDoctor:
     image: 'postgres:16'
-    container_name: postgres-db-Docter
+    container_name: postgres-db-Doctor
     # restart: always
     environment:
-      POSTGRES_USER: '${POSTGRES_USER_DOCTER}'
-      POSTGRES_PASSWORD: '${POSTGRES_PASSWORD_DOCTER}'
-      POSTGRES_DB: '${POSTGRES_DB_DOCTER}'
+      POSTGRES_USER: '${POSTGRES_USER_DOCTOR}'
+      POSTGRES_PASSWORD: '${POSTGRES_PASSWORD_DOCTOR}'
+      POSTGRES_DB: '${POSTGRES_DB_DOCTOR}'
     ports:
-      - '${POSTGRES_PORT_DOCTER}:5432'
+      - '${POSTGRES_PORT_DOCTOR}:5432'
     volumes:
-      - 'postgres_data_docter:/var/lib/postgresql/data'
+      - 'postgres_data_doctor:/var/lib/postgresql/data'
   postgresPatient:
     image: 'postgres:16'
     container_name: postgres-db-Patient
@@ -34,8 +34,8 @@ services:
     ports:
       - '${PGADMIN_PORT}:80'
     depends_on:
-      - postgresDocter
+      - postgresDoctor
       - postgresPatient
 volumes:
-  postgres_data_docter:
+  postgres_data_doctor:
   postgres_data_patient:
