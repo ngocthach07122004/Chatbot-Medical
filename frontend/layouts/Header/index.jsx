@@ -39,6 +39,15 @@ export default function Header() {
   // Check if current page is login or signup to un-toggle nav buttons
   const isAuthPage = location.pathname === "/login" || location.pathname === "/signup";
 
+  // Helper function to check if a nav item should be active based on current route
+  const isNavItemActive = (navObject) => {
+    if (isAuthPage) return false;
+    // Check if current path matches the nav url
+    if (location.pathname === `/${navObject.url}`) return true;
+    // Otherwise check the activeNav state
+    return activeNav === navObject.id;
+  };
+
   return (
     <div className={cx("wrapper_header")}>
       <header className={cx("header")}>
@@ -52,7 +61,7 @@ export default function Header() {
             {
               navObjects.map((navObject) =>
                 <div
-                  className={cx("nawItem", !isAuthPage && activeNav === navObject.id ? 'activeNawItem' : '')}
+                  className={cx("nawItem", isNavItemActive(navObject) ? 'activeNawItem' : '')}
                   key={navObject.id}
                   onClick={() => onClickNavItem(navObject.url, navObject.id)}
                 >
