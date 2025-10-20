@@ -12,6 +12,7 @@ func RouterConfig(router *gin.Engine, controllerCollection *initBean.ControllerC
 	{
 		patientRouter.POST("/create", controllerCollection.PatientRepo.CreatePatient)
 		patientRouter.GET("/:id", controllerCollection.PatientRepo.GetPatientById)
+		patientRouter.GET("/doctor/:doctorId", controllerCollection.PatientRepo.FindPatientsByDoctor)
 	}
 	{
 		pathology.POST("/create", controllerCollection.PatientRepo.CreatePathology)

@@ -1,13 +1,17 @@
 package model
 
 import (
+	"time"
+
 	"gorm.io/datatypes"
 	"gorm.io/gorm"
 )
 
 type Pathology struct {
-	ID uint64 `gorm:"primaryKey" json:"id"`
-	gorm.Model
+	ID        uint64         `gorm:"primaryKey;autoIncrement" json:"id"`
+	CreatedAt time.Time      `json:"createdAt"`
+	UpdatedAt time.Time      `json:"updatedAt"`
+	DeletedAt gorm.DeletedAt `gorm:"index" json:"deletedAt"`
 	Data      datatypes.JSON `gorm:"type:jsonb" json:"data"`
 	PatientId uint64         `json:"patientId"`
 	// Patient   *PatientProfile `gorm:"foreignKey:PatientId,references:ID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL" json:"patient"`
