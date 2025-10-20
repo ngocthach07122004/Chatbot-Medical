@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import jsPDF from "jspdf";
 import styles from "./DoctorProfile.module.scss";
 import classNames from "classnames/bind";
 
@@ -68,6 +69,127 @@ const DoctorProfile = () => {
             languages,
         }));
         setIsEditOpen(false);
+    };
+
+    const toSafeFileName = (name) =>
+        name.replace(/[^a-z0-9]+/gi, "_").replace(/^_+|_+$/g, "").substring(0, 64);
+
+    const handleDownloadCV = () => {
+        const doc = new jsPDF({ unit: "pt", format: "a4" });
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const pageHeight = doc.internal.pageSize.getHeight();
+        const margin = 48; // 2/3 inch margins
+        const contentWidth = pageWidth - margin * 2;
+        const baseLine = 16; // baseline spacing in pt
+        let y = margin;
+
+        const ensureSpace = (needed = baseLine) => {
+            if (y + needed > pageHeight - margin) {
+                doc.addPage();
+                y = margin;
+            }
+        };
+
+        const heading = (text) => {
+            ensureSpace(baseLine * 1.8);
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(14);
+            doc.text(text, margin, y);
+            y += baseLine * 1.2;
+            doc.setFont("helvetica", "normal");
+            doc.setFontSize(11);
+        };
+
+        const paragraph = (text) => {
+            if (!text) return;
+            doc.setFont("helvetica", "normal");
+            doc.setFontSize(11);
+            const lines = doc.splitTextToSize(text, contentWidth);
+            lines.forEach((line) => {
+                ensureSpace(baseLine);
+                doc.text(line, margin, y);
+                y += baseLine;
+            });
+            y += 4; // small spacer
+        };
+
+        const bullets = (items = []) => {
+            items.forEach((item) => {
+                const lines = doc.splitTextToSize(item, contentWidth - 14);
+                ensureSpace(baseLine);
+                doc.text("•", margin, y);
+                lines.forEach((line, idx) => {
+                    if (idx > 0) ensureSpace(baseLine);
+                    doc.text(line, margin + 14, y);
+                    y += baseLine;
+                });
+            });
+            y += 4;
+        };
+
+        // Header: Name
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(22);
+        doc.text(doctor.name || "Doctor", margin, y);
+        y += baseLine * 1.5;
+
+        // Subtitle: Title • Hospital
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(12);
+        const subtitle = [doctor.title, doctor.hospital].filter(Boolean).join(" • ");
+        if (subtitle) {
+            doc.text(subtitle, margin, y);
+            y += baseLine * 1.2;
+        }
+
+        // Meta line
+        doc.setFontSize(10);
+        const meta = [
+            `Years of Experience: ${doctor.years}+`,
+            `Patients Served: ${doctor.patients.toLocaleString?.() || doctor.patients}`,
+            `Rating: ${doctor.rating} (${doctor.reviews} reviews)`,
+        ].join("   |   ");
+        doc.text(meta, margin, y);
+        y += baseLine * 1.5;
+
+        // Contact
+        if (doctor.email || doctor.phone || doctor.location) {
+            heading("Contact");
+            if (doctor.email) { ensureSpace(baseLine); doc.text(`Email: ${doctor.email}`, margin, y); y += baseLine; }
+            if (doctor.phone) { ensureSpace(baseLine); doc.text(`Phone: ${doctor.phone}`, margin, y); y += baseLine; }
+            if (doctor.location) { ensureSpace(baseLine); doc.text(`Location: ${doctor.location}`, margin, y); y += baseLine; }
+            y += 6;
+        }
+
+        // Summary
+        if (doctor.about) {
+            heading("Summary");
+            paragraph(doctor.about);
+        }
+
+        // Specialties
+        if (doctor.specialties?.length) {
+            heading("Specialties");
+            bullets(doctor.specialties);
+        }
+
+        // Languages
+        if (doctor.languages?.length) {
+            heading("Languages");
+            paragraph(doctor.languages.join(", "));
+        }
+
+        // Experience (static sample with current hospital)
+        heading("Experience");
+        const experienceItems = [
+            `2019 - Present: Senior Cardiologist, ${doctor.hospital || "General Hospital"}`,
+            "2016 - 2019: Cardiologist, Central Hospital",
+            "2013 - 2016: Resident Doctor, City Hospital",
+        ];
+        bullets(experienceItems);
+
+        const base = toSafeFileName(doctor.name || "Doctor_Profile");
+        doc.save(`${base}_CV.pdf`);
     };
 
     return (
@@ -174,7 +296,7 @@ const DoctorProfile = () => {
 
             <section className={cx("actions_row")}>
                 <button className={cx("btn", "primary")} onClick={openEdit}>Edit Profile</button>
-                <button className={cx("btn", "secondary")} onClick={() => window.alert('Downloading CV...')}>Download CV</button>
+                <button className={cx("btn", "secondary")} onClick={handleDownloadCV}>Download CV</button>
             </section>
 
             {isEditOpen && (
