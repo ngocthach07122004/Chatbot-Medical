@@ -1,0 +1,129 @@
+.wrapper {
+    padding: 24px;
+    background: linear-gradient(180deg, var(--surface-bg-start), var(--surface-bg-mid) 30%, var(--surface-bg-end));
+    border: 1px solid var(--surface-border);
+    border-radius: 16px;
+    box-shadow: 0 8px 24px rgba(2, 6, 23, .04);
+}
+
+.header_row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 16px;
+
+    h1 {
+        font-size: 20px;
+        margin: 0;
+    }
+}
+
+.search {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background: rgba(255, 255, 255, .6);
+    border: 1px solid var(--surface-border);
+    border-radius: 10px;
+
+    input {
+        border: none;
+        outline: none;
+        background: transparent;
+        min-width: 260px;
+    }
+}
+
+.add_form {
+    display: grid;
+    grid-template-columns: 2fr 120px 2fr auto;
+    gap: 8px;
+    margin-bottom: 16px;
+
+    input {
+        padding: 10px 12px;
+        border: 1px solid var(--surface-border);
+        border-radius: 10px;
+        background: rgba(255, 255, 255, .7);
+    }
+}
+
+.btn {
+    padding: 10px 14px;
+    border-radius: 10px;
+    border: 1px solid var(--surface-border);
+    background: #fff;
+    cursor: pointer;
+}
+
+.btn.primary {
+    background: #2563eb;
+    color: #fff;
+    border-color: #2563eb;
+}
+
+.btn.danger {
+    background: #ef4444;
+    color: #fff;
+    border-color: #ef4444;
+}
+
+.table {
+    display: grid;
+    gap: 8px;
+}
+
+.thead,
+.row {
+    display: grid;
+    grid-template-columns: 2fr 120px 2fr 220px;
+    align-items: center;
+}
+
+.thead {
+    font-weight: 600;
+    color: #334155;
+    border-bottom: 1px dashed var(--surface-border);
+    padding: 8px 0;
+}
+
+.row {
+    background: rgba(255, 255, 255, .6);
+    border: 1px solid var(--surface-border);
+    border-radius: 12px;
+    padding: 10px;
+}
+
+.cell.name {
+    cursor: pointer;
+}
+
+.cell.actions {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+}
+
+.empty {
+    text-align: center;
+    color: #64748b;
+    padding: 16px;
+}
+
+@media (max-width: 768px) {
+    .add_form {
+        grid-template-columns: 1fr;
+    }
+
+    .thead,
+    .row {
+        grid-template-columns: 1fr;
+        gap: 4px;
+    }
+
+    .cell.actions {
+        justify-content: flex-start;
+    }
+}

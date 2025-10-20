@@ -1,58 +1,99 @@
 import React, { useState } from "react";
 import classNames from 'classnames/bind';
 import styles from "./Header.module.scss";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
-const cx = classNames.bind(styles); 
-const navObjects =  [
-   {
-    'id':1,
-    'name':'About We',
-    'url':'aboutWe'
-   },
-   {
-    'id':2,
-    'name':'Chatbot',
-    'url':'chatbot'
-   }
+const cx = classNames.bind(styles);
+const navObjects = [
+  {
+    'id': 1,
+    'name': 'About Us',
+    'url': 'about'
+  },
+  {
+    'id': 2,
+    'name': 'Chatbot',
+    'url': 'chatbot'
+  }
+  , {
+    'id': 3,
+    'name': 'Patients',
+    'url': 'patients'
+  }
 ]
 export default function Header() {
   const navigate = useNavigate();
-  const [isOpen, setIsOpen] = useState(0);
+  const location = useLocation();
+  const [activeNav, setActiveNav] = useState(0);
+
   const onClickNavItem = (url, idNav) => {
-     setIsOpen(idNav);
-     return navigate(`/${url}`)
+    setActiveNav(idNav);
+    navigate(`/${url}`);
   }
+
+  const handleLogoClick = () => {
+    setActiveNav(0);
+    navigate('/');
+  }
+
+  const handleAuthNavigation = (path) => {
+    setActiveNav(0);
+    navigate(path);
+  }
+
+  // Check if current page is login or signup to un-toggle nav buttons
+  const isAuthPage = location.pathname === "/login" || location.pathname === "/signup";
+
+  // Helper function to check if a nav item should be active based on current route
+  const isNavItemActive = (navObject) => {
+    if (isAuthPage) return false;
+    // Check if current path matches the nav url
+    if (location.pathname === `/${navObject.url}`) return true;
+    // Otherwise check the activeNav state
+    return activeNav === navObject.id;
+  };
+
   return (
-    <div className={`${cx("wrapper_header")} navbar navbar-expand-lg main-nav`}>
-      <header className={cx("header", "container")}>
+    <div className={cx("wrapper_header")}>
+      <header className={cx("header")}>
         {/* Logo */}
-        <div  className={cx("wrapper_logo")}>
-          <div className={cx("logo")}>
-           <>
-              <i className={cx("fa-solid fa-user-nurse","custom_icon")}></i>
-      
-              <span className={cx("title_icon")}>The powerful chatbot for medical</span>
-           </>
+        <div className={cx("wrapper_logo")}>
+          <div className={cx("logo")} onClick={handleLogoClick}>
+            <i className="fa-solid fa-user-nurse"></i>
+            <span className={cx("title_icon")}>The powerful chatbot for medical</span>
           </div>
           <div className={cx("wrapper_nawItem")}>
-          {
-            navObjects.map((navObject,index) => 
-            (<div className={cx("nawItem", isOpen==navObject.id ? 'activeNawItem' :'' )} key = {index} onClick={ ()=>onClickNavItem(navObject.url,navObject.id)  } ><span className={cx('nawItem_text')}>{navObject.name}</span> </div>)
-            )
-          }
+            {
+              navObjects.map((navObject) =>
+                <div
+                  className={cx("nawItem", isNavItemActive(navObject) ? 'activeNawItem' : '')}
+                  key={navObject.id}
+                  onClick={() => onClickNavItem(navObject.url, navObject.id)}
+                >
+                  <span className={cx('nawItem_text')}>{navObject.name}</span>
+                </div>
+              )
+            }
           </div>
         </div>
-  
+
         {/* Navigation */}
-        
-  
+
+
         {/* Buttons */}
         <div className={cx("actions")}>
-          <button className={cx("actions_btn","login")}>Log In</button>
-          <button className={cx("actions_btn","signup")}>Sign Up</button>
+          <div className={cx("authToggle")}>
+            <button
+              className={cx("authBtn", location.pathname === "/login" ? "activeAuth" : "")}
+              onClick={() => navigate("/login")}
+            >Log In</button>
+            <button
+              className={cx("authBtn", location.pathname === "/signup" ? "activeAuth" : "")}
+              onClick={() => navigate("/signup")}
+            >Sign Up</button>
+          </div>
         </div>
-  
+
         {/* Hamburger for mobile */}
         {/* <button
           className={cx("hamburger")}
