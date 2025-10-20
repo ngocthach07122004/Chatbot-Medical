@@ -5,14 +5,36 @@ import classNames from 'classnames/bind';
 const cx = classNames.bind(styles);
 
 const Chatbot = () => {
-    const [messages, setMessages] = useState([
+    // Helper to generate a greeting message
+    const makeGreeting = () => ({
+        id: Date.now(),
+        type: 'bot',
+        text: "Hello! I'm your medical assistant. How can I help you today?",
+        timestamp: new Date(),
+    });
+
+    // Seed a couple of sessions for the history sidebar (UI-only)
+    const initialSessions = [
         {
-            id: 1,
-            type: 'bot',
-            text: 'Hello! I\'m your medical assistant. How can I help you today?',
-            timestamp: new Date()
-        }
-    ]);
+            id: 's1',
+            title: 'Medical Consultation',
+            createdAt: new Date(Date.now() - 1000 * 60 * 60 * 3),
+            messages: [makeGreeting()],
+        },
+        {
+            id: 's2',
+            title: 'Symptom Check',
+            createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24),
+            messages: [
+                { id: Date.now() - 5, type: 'user', text: 'I have a mild fever and sore throat.', timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24) },
+                { id: Date.now() - 4, type: 'bot', text: 'Those can be signs of a common cold or flu. Do you have any other symptoms?', timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24) },
+            ],
+        },
+    ];
+
+    const [sessions, setSessions] = useState(initialSessions);
+    const [currentSessionId, setCurrentSessionId] = useState(initialSessions[0].id);
+    const [messages, setMessages] = useState(initialSessions[0].messages);
     const [inputValue, setInputValue] = useState('');
     const [isTyping, setIsTyping] = useState(false);
     const messagesEndRef = useRef(null);
@@ -37,7 +59,15 @@ const Chatbot = () => {
             text: inputValue,
             timestamp: new Date()
         };
+        // Update local messages state
         setMessages(prev => [...prev, userMessage]);
+        // Update the message list in the selected session
+        setSessions(prev => prev.map(s => {
+            if (s.id !== currentSessionId) return s;
+            const hadUserBefore = (s.messages || []).some(m => m.type === 'user');
+            const newTitle = hadUserBefore ? s.title : (userMessage.text.trim().slice(0, 40) || s.title || 'New Chat');
+            return { ...s, title: newTitle, messages: [...s.messages, userMessage] };
+        }));
         setInputValue('');
         setIsTyping(true);
 
@@ -49,20 +79,32 @@ const Chatbot = () => {
                 text: 'Thank you for your message. As a medical assistant, I can help you with general health information, symptom assessment, and medical guidance. Please note that I\'m not a replacement for professional medical advice.',
                 timestamp: new Date()
             };
+            // Update local messages state
             setMessages(prev => [...prev, botMessage]);
+            // Update the selected session as well
+            setSessions(prev => prev.map(s => s.id === currentSessionId ? { ...s, messages: [...s.messages, botMessage] } : s));
             setIsTyping(false);
         }, 1500);
     };
 
     const handleNewChat = () => {
-        setMessages([
-            {
-                id: Date.now(),
-                type: 'bot',
-                text: 'Hello! I\'m your medical assistant. How can I help you today?',
-                timestamp: new Date()
-            }
-        ]);
+        const newSession = {
+            id: `s_${Math.random().toString(36).slice(2, 8)}`,
+            title: 'New Chat',
+            createdAt: new Date(),
+            messages: [makeGreeting()],
+        };
+        setSessions(prev => [newSession, ...prev]);
+        setCurrentSessionId(newSession.id);
+        setMessages(newSession.messages);
+    };
+
+    const handleSelectSession = (id) => {
+        setCurrentSessionId(id);
+        const found = sessions.find(s => s.id === id);
+        if (found) {
+            setMessages(found.messages);
+        }
     };
 
     const suggestedPrompts = [
@@ -86,18 +128,25 @@ const Chatbot = () => {
                 <div className={cx("chat_history")}>
                     <div className={cx("history_section")}>
                         <h3 className={cx("history_title")}>Recent</h3>
-                        <div className={cx("history_item", "active")}>
-                            <i className="fa-solid fa-message"></i>
-                            <span>Medical Consultation</span>
-                        </div>
-                        <div className={cx("history_item")}>
-                            <i className="fa-solid fa-message"></i>
-                            <span>Symptom Check</span>
-                        </div>
-                        <div className={cx("history_item")}>
-                            <i className="fa-solid fa-message"></i>
-                            <span>Health Tips</span>
-                        </div>
+                        {sessions.map((s) => (
+                            <div
+                                key={s.id}
+                                className={cx("history_item", currentSessionId === s.id ? "active" : "")}
+                                onClick={() => handleSelectSession(s.id)}
+                                role="button"
+                                tabIndex={0}
+                                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleSelectSession(s.id); }}
+                            >
+                                <i className="fa-solid fa-message"></i>
+                                <span>{s.title}</span>
+                            </div>
+                        ))}
+                        {sessions.length === 0 && (
+                            <div className={cx("history_item")}>
+                                <i className="fa-solid fa-message"></i>
+                                <span>No conversations yet</span>
+                            </div>
+                        )}
                     </div>
                 </div>
 
