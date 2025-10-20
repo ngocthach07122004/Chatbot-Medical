@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 @Repository
-public interface DocterRepository extends JpaRepository<Docter,String> {
+public interface DocterRepository extends JpaRepository<Docter,Long> {
 
     Optional<Docter> findByGmail (String gmail);
 }

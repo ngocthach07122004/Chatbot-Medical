@@ -15,8 +15,8 @@ import lombok.experimental.FieldDefaults;
 @Data
 public class Docter {
     @Id
-    @GeneratedValue(strategy =  GenerationType.UUID)
-    String id;
+    @GeneratedValue(strategy =  GenerationType.IDENTITY)
+            Long id;
     String gmail;
     String password;
     int age;
