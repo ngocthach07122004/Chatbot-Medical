@@ -1,6 +1,7 @@
 package com.vn.Medical.mapper;
 
 import com.vn.Medical.dto.request.DoctorLogin;
+import com.vn.Medical.dto.request.DoctorSignup;
 import com.vn.Medical.entity.Doctor;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -13,6 +14,6 @@ public interface DoctorMapper {
     Doctor toDoctor(Doctor Doctor);
 
     @Mapping(target = "password",ignore = true)
-    Doctor fromDoctorRequestToDoctor(DoctorLogin DoctorLogin);
+    Doctor doctorSignupToDoctor(DoctorSignup doctorSignup);
     void updateDoctor(@MappingTarget Doctor Doctor, Doctor DoctorUpdate);
 }

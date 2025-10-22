@@ -1,5 +1,5 @@
 server:
-  port: 8080
+  port: ${DOCTOR_SERVICE_PORT}
 spring:
   application:
     name: Medical-backend
@@ -17,6 +17,8 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
+        jdbc.lob.non_contextual_creation: true
+        type.json_sql_type: OTHER
     show-sql: true
   kafka:
     bootstrap-servers: localhost:9094

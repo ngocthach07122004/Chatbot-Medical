@@ -10,6 +10,7 @@ public class MedicalApplication {
 
 	public static void main(String[] args) {
         Dotenv dotenv = Dotenv.load(); // load .env ở project root
+        System.setProperty("DOCTOR_SERVICE_PORT", dotenv.get("DOCTOR_PORT"));
         System.setProperty("DB_HOST", dotenv.get("DB_HOST_DOCTOR"));
         System.setProperty("DB_PORT", dotenv.get("POSTGRES_PORT_DOCTOR"));
         System.setProperty("DB_NAME", dotenv.get("POSTGRES_DB_DOCTOR"));

@@ -1,6 +1,7 @@
 package com.vn.Medical.service;
 
 import com.vn.Medical.dto.request.DoctorLogin;
+import com.vn.Medical.dto.request.DoctorSignup;
 import com.vn.Medical.dto.response.ApiResponse;
 import com.vn.Medical.entity.Doctor;
 import com.vn.Medical.exception.AppException;
@@ -22,22 +23,21 @@ public class DoctorService {
     DoctorRepository DoctorRepository;
     PasswordEncoder passwordEncoder;
     DoctorMapper DoctorMapper;
-    public Doctor createDoctor(DoctorLogin DoctorRequest ) {
-        Optional<Doctor> Doctor = DoctorRepository.findByGmail(DoctorRequest.getGmail());
+    public Doctor createAccount(DoctorSignup doctorSignup ) {
+        Optional<Doctor> Doctor = DoctorRepository.findByGmail(doctorSignup.getGmail());
         if(!Doctor.isPresent()){
-            Doctor newDoctor = DoctorMapper.fromDoctorRequestToDoctor(DoctorRequest);
-            newDoctor.setPassword(passwordEncoder.encode(DoctorRequest.getPassword()));
+            Doctor newDoctor = DoctorMapper.doctorSignupToDoctor(doctorSignup);
+            newDoctor.setPassword(passwordEncoder.encode(doctorSignup.getPassword()));
             return DoctorRepository.save(newDoctor);
         }
         else {
                 throw new AppException(ErrorCode.EMAIL_ALREADY_EXIST);
         }
     }
-    private Doctor findDoctor (String gmail) {
+    public Doctor findDoctor (String gmail) {
        return  DoctorRepository.findByGmail(gmail).orElseThrow(
                 () -> new AppException(ErrorCode.EMAIL_NOT_EXIST)
         );
-
     }
     public ApiResponse<Doctor>  authentication (DoctorLogin DoctorLogin) {
          Doctor Doctor = DoctorRepository.findByGmail(DoctorLogin.getGmail()).orElseThrow(
