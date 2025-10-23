@@ -26,13 +26,14 @@ public class DoctorController {
         return DoctorService.authentication(DoctorLogin);
     }
     @PostMapping("/update/{gmail}")
-    public String updateDoctor (@PathVariable String gmail, @RequestBody Doctor Doctor ){
-
-        return DoctorService.updateDoctor(gmail,Doctor);
+    public ApiResponse<?>updateDoctor (@PathVariable String gmail, @RequestBody Doctor Doctor ){
+        String  status = DoctorService.updateDoctor(gmail,Doctor);
+        boolean isSucess = status.matches("success" );
+        return ApiResponse.builder().code(isSucess ? "200" : "500").message(status).build();
     }
     @GetMapping("/get/{gmail}")
-    public Doctor getDoctorProfile (@PathVariable String gmail) {
-         return DoctorService.findDoctor(gmail);
+    public ApiResponse<Doctor> getDoctorProfile (@PathVariable String gmail) {
+        return ApiResponse.<Doctor>builder().code("200").message("success").entity(DoctorService.findDoctor(gmail)).build();
     }
 
 }

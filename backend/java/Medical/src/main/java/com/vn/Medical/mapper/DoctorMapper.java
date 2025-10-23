@@ -15,5 +15,6 @@ public interface DoctorMapper {
 
     @Mapping(target = "password",ignore = true)
     Doctor doctorSignupToDoctor(DoctorSignup doctorSignup);
+    @Mapping(target = "id", ignore = true)
     void updateDoctor(@MappingTarget Doctor Doctor, Doctor DoctorUpdate);
 }
