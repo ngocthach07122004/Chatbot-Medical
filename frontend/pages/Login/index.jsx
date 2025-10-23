@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import styles from "./Login.module.scss";
 import classNames from 'classnames/bind';
 import { useNavigate } from "react-router-dom";
+import doctorAuthService from "../../services/doctorAuthApi"
 const cx = classNames.bind(styles);
 
 const Login = () => {
@@ -20,10 +21,34 @@ const Login = () => {
         }));
     };
 
+    const handleLogin = async  (email, password) => {
+        try 
+        {
+        const res = await doctorAuthService.login(email,password);
+        if (res.code == "200") {
+              localStorage.setItem("login", "success");
+          localStorage.setItem("isLogin", true);
+        localStorage.setItem("fullName",res.entity.fullName);
+        navigate("/chatbot")
+        }
+        else {
+             localStorage.setItem("login", "fail");
+          localStorage.setItem("isLogin", false);
+        }
+    }
+       catch (error) {
+           localStorage.setItem("login", "fail");
+          localStorage.setItem("isLogin", false);
+
+    }
+    }
+
     const handleSubmit = (e) => {
         e.preventDefault();
+        handleLogin(formData.email,formData.password)
         // Handle login logic here
-        console.log("Login data:", formData);
+        // console.log("Login data:", formData);
+
     };
 
     return (

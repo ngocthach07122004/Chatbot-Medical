@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import styles from "./Signup.module.scss";
 import classNames from 'classnames/bind';
 import { useNavigate } from "react-router-dom";
+import doctorAuthService from "../../services/doctorAuthApi"
 const cx = classNames.bind(styles);
 
 const Signup = () => {
@@ -22,6 +23,25 @@ const Signup = () => {
         }));
     };
 
+    const registerUser = async (data) => {
+    try {
+      const res = await doctorAuthService.register(data);
+    //   alert("Đăng ký thành công!");
+    //   console.log(res.data);
+     if (res.code == "200") {
+        navigate("/chatbot");
+          localStorage.setItem("login", "success");
+          localStorage.setItem("isLogin", true);
+        localStorage.setItem("fullName",res.entity.fullName);
+     }
+    } catch (error) {
+           localStorage.setItem("login", "fail");
+          localStorage.setItem("isLogin", false);
+      alert("Đăng ký thất bại!");
+      console.error(error);
+    }
+  };
+
     const handleSubmit = (e) => {
         e.preventDefault();
         // Handle signup logic here
@@ -29,7 +49,16 @@ const Signup = () => {
             alert("Passwords don't match!");
             return;
         }
-        console.log("Signup data:", formData);
+        const payload = {
+            fullName: formData.fullName,
+            gmail: formData.email,
+            password: formData.password
+        }
+
+        registerUser(payload)
+
+
+        // console.log("Signup data:", formData);
     };
 
     return (
