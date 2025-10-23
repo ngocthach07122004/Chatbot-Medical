@@ -16,3 +16,4 @@ public class DoctorSignup {
     String gmail;
     String password;
 }
+
