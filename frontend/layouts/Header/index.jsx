@@ -81,9 +81,11 @@ export default function Header() {
     };
 
     window.addEventListener("loginChange", handleLoginChange);
+    window.addEventListener("profileChange", handleLoginChange);
 
     return () => {
       window.removeEventListener("loginChange", handleLoginChange);
+      window.removeEventListener("profileChange", handleLoginChange);
     };
   }, []);
 
@@ -106,6 +108,7 @@ export default function Header() {
     localStorage.removeItem("login");
     localStorage.removeItem("isLogin");
     localStorage.removeItem("fullName");
+    localStorage.removeItem("gmail");
     setIsLogin(false);
     setFullName("");
     navigate("login/");
