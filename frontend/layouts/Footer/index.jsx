@@ -9,7 +9,7 @@ const Footer = () => {
       <div className="container">
         <div className="row">
           <div className="col-md-4">
-            <h5>About BkuDocter</h5>
+            <h5>About BkuDoctor</h5>
             <ul className="list-unstyled">
               <li><Link className="text-light text-decoration-none" to="/about">Our Story</Link></li>
               <li><Link className="text-light text-decoration-none" to="/careers">Careers</Link></li>
