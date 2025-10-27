@@ -436,3 +436,40 @@
     grid-template-columns: 120px 1fr;
   }
 }
+
+// experience
+.wrapper_experience {
+  display: block !important;
+  flex-basis: 100%;
+}
+.experience_row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+
+  input {
+    flex: 1;
+    padding: 6px 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+  }
+
+  .remove_btn {
+    background: #ff4d4f;
+    color: white;
+    border: none;
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+}
+
+.add_btn {
+  background: #1677ff;
+  color: white;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-top: 6px;
+}

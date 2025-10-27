@@ -23,6 +23,13 @@ const dataFake = {
   about:
     "Experienced cardiologist focusing on preventive care and patient-centric treatment plans. Passionate about improving heart health through lifestyle changes and evidence-based medicine.",
 };
+
+// [
+//   {
+//     year: "",
+//     year: "",
+//   },
+// ];
 const DoctorProfile = () => {
   // UI-only mock data (will be replaced by backend integration)
   const [gmail, setGmail] = useState(null);
@@ -30,6 +37,8 @@ const DoctorProfile = () => {
 
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [formData, setFormData] = useState(dataFake);
+
+  const [experience, setExperience] = useState([{ year: "", description: "" }]);
 
   const openEdit = () => {
     setFormData({
@@ -71,6 +80,7 @@ const DoctorProfile = () => {
           specialties: res.data?.specialties || [],
           languages: res.data?.languages || ["Vietnamese", "English"],
           about: res.data?.about,
+          experience: res.data?.experience,
         };
         setDoctor(data);
       }
@@ -128,6 +138,7 @@ const DoctorProfile = () => {
       about: formData.about || doctor.about,
       specialties,
       languages,
+      experience,
     };
 
     setDoctor(updatedDoctor); // cập nhật state
@@ -145,6 +156,7 @@ const DoctorProfile = () => {
       specialties: updatedDoctor.specialties,
       languages: updatedDoctor.languages,
       about: updatedDoctor.about,
+      experience: updatedDoctor.experience,
     };
 
     const payload = {
@@ -157,6 +169,21 @@ const DoctorProfile = () => {
 
     handleUpdateProfile(gmail, payload);
     setIsEditOpen(false);
+  };
+
+  const handleChangeExperience = (index, field, value) => {
+    const newExperience = [...experience];
+    newExperience[index][field] = value;
+    setExperience(newExperience);
+  };
+
+  const addExperience = () => {
+    setExperience([...experience, { year: "", description: "" }]);
+  };
+
+  const removeExperience = (index) => {
+    const newExperience = experience.filter((_, i) => i !== index);
+    setExperience(newExperience);
   };
 
   const toSafeFileName = (name) =>
@@ -407,20 +434,20 @@ const DoctorProfile = () => {
             Experience
           </h2>
           <ul className={cx("timeline")}>
-            <li>
-              <div className={cx("time")}>2019 - Present</div>
-              <div className={cx("desc")}>
-                Senior Cardiologist, {doctor.hospital}
-              </div>
-            </li>
-            <li>
-              <div className={cx("time")}>2016 - 2019</div>
-              <div className={cx("desc")}>Cardiologist, Central Hospital</div>
-            </li>
-            <li>
-              <div className={cx("time")}>2013 - 2016</div>
-              <div className={cx("desc")}>Resident Doctor, City Hospital</div>
-            </li>
+            {experience.length == 1 &&
+            experience[0].description === "default_value" ? (
+              <>
+                <div className={cx("time")}>2025 - Present</div>
+                <div className={cx("desc")}>Please add yours experience</div>
+              </>
+            ) : (
+              experience.map((experienceInfo) => (
+                <li>
+                  <div className={cx("time")}>{experienceInfo.year}</div>
+                  <div className={cx("desc")}>{experienceInfo.description}</div>
+                </li>
+              ))
+            )}
           </ul>
         </div>
       </section>
@@ -512,6 +539,52 @@ const DoctorProfile = () => {
                     onChange={handleChange}
                   />
                 </div>
+
+                <div className={cx("form_group", "wide")}>
+                  <label>Experience</label>
+                  {experience.map((exp, index) => (
+                    <div key={index} className={cx("experience_row")}>
+                      <input
+                        type="text"
+                        name={`year-${index}`}
+                        placeholder="Year (e.g. 2023-2024)"
+                        value={exp.year}
+                        onChange={(e) =>
+                          handleChangeExperience(index, "year", e.target.value)
+                        }
+                      />
+                      <input
+                        type="text"
+                        name={`description-${index}`}
+                        placeholder="Description"
+                        value={exp.description}
+                        onChange={(e) =>
+                          handleChangeExperience(
+                            index,
+                            "description",
+                            e.target.value
+                          )
+                        }
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeExperience(index)}
+                        className={cx("remove_btn")}
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  ))}
+
+                  <button
+                    type="button"
+                    onClick={addExperience}
+                    className={cx("add_btn")}
+                  >
+                    + Add Experience
+                  </button>
+                </div>
+
                 <div className={cx("form_group", "wide")}>
                   <label>Location</label>
                   <input
