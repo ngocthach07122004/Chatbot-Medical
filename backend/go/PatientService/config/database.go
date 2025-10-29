@@ -1,6 +1,7 @@
 package config
 
 import (
+	"PatientService/internal/model"
 	"fmt"
 	"log"
 	"os"
@@ -33,5 +34,9 @@ func ConnectDatabase() {
 	}
 
 	DB = database
+	DB.AutoMigrate(&model.Diagnosis{})
+	DB.AutoMigrate(&model.DoctorPatientChat{})
+	DB.AutoMigrate(&model.Pathology{})
+	DB.AutoMigrate(&model.PatientProfile{})
 	fmt.Println("Connect Database successful")
 }
