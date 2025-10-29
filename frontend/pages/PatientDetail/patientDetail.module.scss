@@ -1,120 +1,156 @@
 .wrapper {
-    padding: 24px;
-    background: linear-gradient(180deg, var(--surface-bg-start), var(--surface-bg-mid) 30%, var(--surface-bg-end));
-    border: 1px solid var(--surface-border);
-    border-radius: 16px;
-    box-shadow: 0 8px 24px rgba(2, 6, 23, .04);
+  padding: 24px;
+  background: linear-gradient(
+    180deg,
+    var(--surface-bg-start),
+    var(--surface-bg-mid) 30%,
+    var(--surface-bg-end)
+  );
+  border: 1px solid var(--surface-border);
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(2, 6, 23, 0.04);
 }
 
 .header {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
 
-    h1 {
-        margin: 0;
-        font-size: 20px;
-    }
+  h1 {
+    margin: 0;
+    font-size: 20px;
+  }
 }
 
 .btn {
-    padding: 10px 14px;
-    border-radius: 10px;
-    border: 1px solid var(--surface-border);
-    background: #fff;
-    cursor: pointer;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--surface-border);
+  background: #fff;
+  cursor: pointer;
 }
 
 .btn.primary {
-    background: #2563eb;
-    color: #fff;
-    border-color: #2563eb;
+  background: #2563eb;
+  color: #fff;
+  border-color: #2563eb;
 }
 
 .btn.danger {
-    background: #ef4444;
-    color: #fff;
-    border-color: #ef4444;
+  background: #ef4444;
+  color: #fff;
+  border-color: #ef4444;
 }
 
 .grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
 }
 
 .card {
-    background: rgba(255, 255, 255, .6);
-    border: 1px solid var(--surface-border);
-    border-radius: 12px;
-    padding: 16px;
+  background: rgba(255, 255, 255, 0.6);
+  border: 1px solid var(--surface-border);
+  border-radius: 12px;
+  padding: 16px;
 }
 
 .form {
-    display: grid;
-    gap: 8px;
+  display: grid;
+  gap: 8px;
 }
 
 .form input {
-    padding: 10px 12px;
-    border: 1px solid var(--surface-border);
-    border-radius: 10px;
-    background: rgba(255, 255, 255, .7);
+  padding: 10px 12px;
+  border: 1px solid var(--surface-border);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.7);
 }
 
 .actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 8px;
-    margin-top: 8px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 8px;
 }
 
 .add_inline {
-    display: grid;
-    grid-template-columns: 1fr auto;
-    gap: 8px;
-    margin-bottom: 8px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+  margin-bottom: 8px;
 }
 
 .add_inline input {
-    padding: 10px 12px;
-    border: 1px solid var(--surface-border);
-    border-radius: 10px;
-    background: rgba(255, 255, 255, .7);
+  padding: 10px 12px;
+  border: 1px solid var(--surface-border);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.7);
 }
 
 .path_list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    display: grid;
-    gap: 8px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 8px;
 }
 
 .path_item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 8px;
-    background: #fff;
-    border: 1px solid var(--surface-border);
-    border-radius: 10px;
-    padding: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  background: #fff;
+  border: 1px solid var(--surface-border);
+  border-radius: 10px;
+  padding: 10px;
 }
 
 .muted {
-    color: #64748b;
-    font-size: 12px;
+  color: #64748b;
+  font-size: 12px;
 }
 
 .view_block {
-    display: grid;
-    gap: 8px;
+  display: grid;
+  gap: 8px;
 }
 
 @media (max-width: 768px) {
-    .grid {
-        grid-template-columns: 1fr;
-    }
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.modal {
+  background: #fff;
+  border-radius: 14px;
+  padding: 24px;
+  width: 420px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  animation: fadeIn 0.3s ease;
+
+  h3 {
+    margin-top: 0;
+    margin-bottom: 16px;
+    font-size: 20px;
+    text-align: center;
+  }
+
+  input,
+  textarea,
+  select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    margin-bottom: 12px;
+    font-size: 14px;
+  }
+
+  textarea {
+    resize: vertical;
+  }
 }

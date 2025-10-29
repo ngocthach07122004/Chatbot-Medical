@@ -29,6 +29,7 @@ const Login = () => {
         localStorage.setItem("isLogin", true);
         localStorage.setItem("fullName", res.entity.fullName);
         localStorage.setItem("gmail", email);
+        localStorage.setItem("doctorId", res.entity.id);
         window.dispatchEvent(new Event("loginChange"));
         navigate("/chatbot");
       } else {

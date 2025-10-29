@@ -34,6 +34,7 @@ const Signup = () => {
         localStorage.setItem("isLogin", true);
         localStorage.setItem("gmail", data.gmail);
         localStorage.setItem("fullName", res.entity.fullName);
+        localStorage.setItem("doctorId", res.entity.id);
       }
     } catch (error) {
       localStorage.setItem("login", "fail");
