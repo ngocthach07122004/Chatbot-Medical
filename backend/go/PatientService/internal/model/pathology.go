@@ -13,6 +13,6 @@ type Pathology struct {
 	UpdatedAt time.Time      `json:"updatedAt"`
 	DeletedAt gorm.DeletedAt `gorm:"index" json:"deletedAt"`
 	Data      datatypes.JSON `gorm:"type:jsonb" json:"data"`
-	PatientId uint64         `json:"patientId"`
+	PatientID uint64         `json:"patientId"`
 	// Patient   *PatientProfile `gorm:"foreignKey:PatientId,references:ID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL" json:"patient"`
 }

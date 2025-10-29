@@ -39,9 +39,9 @@ func ConsumeHistoryChatTopic(DB *gorm.DB, kafkaAttribute *initBean.KafkaAttribut
 		// data.saveDoctorPatientMessage(&dto)
 		historyChatId := uint64(dto.HistoryChatID)
 		doctorPatientChat := model.DoctorPatientChat{
-			PatientId:   uint64(dto.PatientID),
-			HistoryChat: &historyChatId,
-			DoctorId:    uint64(dto.DoctorID),
+			PatientID:   uint64(dto.PatientID),
+			HistoryChatID: &historyChatId,
+			DoctorID:    uint64(dto.DoctorID),
 		}
 		DB.Model(&model.DoctorPatientChat{}).Save(doctorPatientChat)
 	}

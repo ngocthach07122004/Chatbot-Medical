@@ -14,11 +14,12 @@ type PatientProfile struct {
 	DeletedAt          gorm.DeletedAt      `gorm:"index" json:"deletedAt"`
 	FullName           *string             `json:"fullName"`
 	Address            *string             `json:"address"`
-	Age                *uint               `json:"age"`
+	Age                *string               `json:"age"`
 	Gender             *string             `json:"gender"`
 	Weight             *string             `json:"weight"`
 	Data               datatypes.JSON      `gorm:"type:jsonb" json:"data"`
-	Pathologys         []Pathology         `json:"pathologys"`
-	Diagnosiss         []Diagnosis         `json:"diagnosiss"`
-	DoctorPatientChats []DoctorPatientChat `json:"DoctorPatientChat"`
+	Pathologys         []Pathology         `gorm:"foreignKey:PatientID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL" json:"pathologys"`
+	Diagnosiss         []Diagnosis         `gorm:"foreignKey:PatientID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL" json:"diagnosiss"`
+	DoctorPatientChats []DoctorPatientChat `gorm:"foreignKey:PatientID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL" json:"doctorPatientChat"`
 }
+
