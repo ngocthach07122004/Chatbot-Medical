@@ -7,12 +7,14 @@ import (
 	"PatientService/routers"
 	"os"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
 func main() {
 	config.ConnectDatabase()
 	router := gin.Default()
+	router.Use(cors.Default())
 	DB := config.DB
 	initBean.InitControllerCollection(DB)
 	Controller := initBean.ControllerCollect

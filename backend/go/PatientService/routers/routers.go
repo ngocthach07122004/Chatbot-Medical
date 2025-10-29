@@ -11,9 +11,11 @@ func RouterConfig(router *gin.Engine, controllerCollection *initBean.ControllerC
 	pathology := router.Group("/pathology")
 	chatHistory := router.Group("/chatHistory")
 	{
-		patientRouter.POST("/create", controllerCollection.PatientRepo.CreatePatient)
-		patientRouter.GET("/:id", controllerCollection.PatientRepo.GetPatientById)
+		patientRouter.POST("/create/:doctorId", controllerCollection.PatientRepo.CreatePatient)
+		patientRouter.GET("/:patientId", controllerCollection.PatientRepo.GetPatientById)
 		patientRouter.GET("/doctor/:doctorId", controllerCollection.PatientRepo.FindPatientsByDoctor)
+		patientRouter.POST("/update/:patientId", controllerCollection.PatientRepo.UpdatePatient)
+		patientRouter.DELETE("/delete/:patientId", controllerCollection.PatientRepo.DeletePatient)
 	}
 	{
 		pathology.POST("/create", controllerCollection.PatientRepo.CreatePathology)

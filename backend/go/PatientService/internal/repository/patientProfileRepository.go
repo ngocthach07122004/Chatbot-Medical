@@ -22,6 +22,18 @@ func (patient *PatientProfileRepo) CreatePatient(c *gin.Context) {
 		return
 	}
 	patient.DB.Create(&patientProfile)
+	doctorIdParam := c.Param("doctorId")
+	doctorId , err := strconv.ParseUint(doctorIdParam, 10, 64)
+		if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid doctor id"})
+		return
+	}
+	doctorPatientChat := model.DoctorPatientChat{
+		PatientID: patientProfile.ID,
+		DoctorID: doctorId,
+		HistoryChatID: nil,
+	}
+	patient.DB.Model(&model.DoctorPatientChat{}).Create(&doctorPatientChat)
 	c.JSON(http.StatusOK, gin.H{"data": patientProfile})
 }
 
@@ -35,18 +47,59 @@ func findPatient(patientId uint64, patient *PatientProfileRepo) helper.Result[mo
 }
 
 func (patient *PatientProfileRepo) GetPatientById(c *gin.Context) {
-	var patientProfile model.PatientProfile
 	patientIdParam := c.Param("patientId")
 	patientId, err := strconv.ParseUint(patientIdParam, 10, 64)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid patientId"})
 		return
 	}
-	if result := findPatient(patientId, patient); result.Err != nil {
+	result := findPatient(patientId, patient);
+	if  result.Err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": result.Err.Error()})
 	}
-	c.JSON(http.StatusOK, gin.H{"data": patientProfile})
+	c.JSON(http.StatusOK, gin.H{"data": result.Value})
 }
+
+
+func (patient *PatientProfileRepo) UpdatePatient (c  *gin.Context) {
+	
+	 patientIdParam := c.Param("patientId")
+     patientId, err := strconv.ParseUint(patientIdParam, 10, 64)
+	 if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid patientId"})
+		return
+	 }
+	result := findPatient(patientId, patient);
+	 if result.Err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": result.Err.Error()})
+ 	}
+	 patientProfile := result.Value 
+	 var patientInput model.PatientProfile;
+	 if err := c.ShouldBindJSON(&patientInput); err != nil {
+		 c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	 }
+	
+	 patient.DB.Model(&patientProfile).Updates(patientInput)
+	 c.JSON(http.StatusOK, gin.H{"data": patientProfile})
+}
+
+func (patient *PatientProfileRepo) DeletePatient ( c *gin.Context) {
+	   patientIdParam := c.Param("patientId")
+     patientId, err := strconv.ParseUint(patientIdParam, 10, 64)
+	 if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid patientId"})
+		return
+	 }
+	 	result := findPatient(patientId, patient);
+	 if result.Err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": result.Err.Error()})
+ 	}
+	 patientProfile := result.Value 
+
+	 patient.DB.Delete(&patientProfile);
+	 c.JSON(http.StatusOK, gin.H{"status": "success", "code":200}) 
+}
+ 
 
 func (patient *PatientProfileRepo) CreatePathology(c *gin.Context) {
 	var patientProfile model.PatientProfile
