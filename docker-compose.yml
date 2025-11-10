@@ -1,38 +1,38 @@
-version: '3.8'
+version: "3.8"
 services:
   postgresDoctor:
-    image: 'postgres:16'
+    image: "postgres:16"
     container_name: postgres-db-Doctor
     # restart: always
     environment:
-      POSTGRES_USER: '${POSTGRES_USER_DOCTOR}'
-      POSTGRES_PASSWORD: '${POSTGRES_PASSWORD_DOCTOR}'
-      POSTGRES_DB: '${POSTGRES_DB_DOCTOR}'
+      POSTGRES_USER: "${POSTGRES_USER_DOCTOR}"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD_DOCTOR}"
+      POSTGRES_DB: "${POSTGRES_DB_DOCTOR}"
     ports:
-      - '${POSTGRES_PORT_DOCTOR}:5432'
+      - "${POSTGRES_PORT_DOCTOR}:5432"
     volumes:
-      - 'postgres_data_doctor:/var/lib/postgresql/data'
+      - "postgres_data_doctor:/var/lib/postgresql/data"
   postgresPatient:
-    image: 'postgres:16'
+    image: "postgres:16"
     container_name: postgres-db-Patient
     # restart: always
     environment:
-      POSTGRES_USER: '${POSTGRES_USER_PATIENT}'
-      POSTGRES_PASSWORD: '${POSTGRES_PASSWORD_PATIENT}'
-      POSTGRES_DB: '${POSTGRES_DB_PATIENT}'
+      POSTGRES_USER: "${POSTGRES_USER_PATIENT}"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD_PATIENT}"
+      POSTGRES_DB: "${POSTGRES_DB_PATIENT}"
     ports:
-      - '${POSTGRES_PORT_PATIENT}:5432'
+      - "${POSTGRES_PORT_PATIENT}:5432"
     volumes:
-      - 'postgres_data_patient:/var/lib/postgresql/data'
+      - "postgres_data_patient:/var/lib/postgresql/data"
   pgadmin:
     image: dpage/pgadmin4
     container_name: pgadmin-Medical
     # restart: always
     environment:
-      PGADMIN_DEFAULT_EMAIL: '${PGADMIN_DEFAULT_EMAIL}'
-      PGADMIN_DEFAULT_PASSWORD: '${PGADMIN_DEFAULT_PASSWORD}'
+      PGADMIN_DEFAULT_EMAIL: "${PGADMIN_DEFAULT_EMAIL}"
+      PGADMIN_DEFAULT_PASSWORD: "${PGADMIN_DEFAULT_PASSWORD}"
     ports:
-      - '${PGADMIN_PORT}:80'
+      - "${PGADMIN_PORT}:80"
     depends_on:
       - postgresDoctor
       - postgresPatient
@@ -41,8 +41,8 @@ services:
     container_name: kafkaMessage
     hostname: kafkaMessage
     ports:
-      - "9092:9092"   # client bootstrap
-      - "9093:9093"   # controller listener
+      - "9092:9092" # client bootstrap
+      - "9093:9093" # controller listener
       - "9094:9094"
     environment:
       KAFKA_KRAFT_MODE: "true"
@@ -53,7 +53,7 @@ services:
 
       KAFKA_LISTENERS: "CONTROLLER://0.0.0.0:9093,PLAINTEXT://0.0.0.0:9092,PLAINTEXT_EXTERNAL://:9094"
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_EXTERNAL:PLAINTEXT"
-      
+
       KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT://kafkaMessage:9092,PLAINTEXT_EXTERNAL://localhost:9094"
       # KAFKA_LISTENERS: "PLAINTEXT_INTERNAL://0.0.0.0:9093,PLAINTEXT_EXTERNAL://0.0.0.0:9092,CONTROLLER://0.0.0.0:9094"
       # KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT_INTERNAL://kafkaMessage:9093,PLAINTEXT_EXTERNAL://localhost:9092"
@@ -71,9 +71,9 @@ services:
       - kafkaMessage
     # entrypoint: ["/bin/sh","-c"]
     volumes:
-    - ./Shellscript:/Shellscript
-    entrypoint: ["/bin/sh","/Shellscript/init-topics.sh"]
-    
+      - ./Shellscript:/Shellscript
+    entrypoint: ["/bin/sh", "/Shellscript/init-topics.sh"]
+
     # command:
     #   - |
     #     echo "Waiting for Kafka to be ready..."
@@ -89,8 +89,6 @@ services:
 volumes:
   postgres_data_doctor:
   postgres_data_patient:
-
-
 # |
 #         echo "Waiting for Kafka to be ready..."
 #         sleep 20
