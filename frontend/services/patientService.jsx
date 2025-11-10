@@ -17,5 +17,9 @@ const PatientService = {
     const res = await patientApi.post(`/patient/update/${patientId}`, data);
     return res;
   },
+  async createPathology(patientId, data) {
+    const res = await patientApi.post(`/pathology/create/${patientId}`, data);
+    return res;
+  },
 };
 export default PatientService;

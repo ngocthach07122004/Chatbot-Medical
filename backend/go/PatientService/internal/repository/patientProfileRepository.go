@@ -120,11 +120,15 @@ func (patient *PatientProfileRepo) CreatePathology(c *gin.Context) {
 		return
 	}
 	patientProfile = result.Value
-	patient.DB.Create(pathology)
+	patient.DB.Create(&pathology)
 	patient.DB.Model(&patientProfile).Association("Pathologys").Append(&pathology)
 	c.JSON(http.StatusOK, gin.H{"data": patientProfile})
 
 }
+
+// func (patient *PatientProfileRepo) FindPathologyByIdPatient( c * gin.Context) {
+// 	  var Pa
+// }
 
 func (patient *PatientProfileRepo) FindPatientsByDoctor(c *gin.Context) {
 	doctorIdParam := c.Param("doctorId")
