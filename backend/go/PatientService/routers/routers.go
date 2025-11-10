@@ -18,7 +18,7 @@ func RouterConfig(router *gin.Engine, controllerCollection *initBean.ControllerC
 		patientRouter.DELETE("/delete/:patientId", controllerCollection.PatientRepo.DeletePatient)
 	}
 	{
-		pathology.POST("/create", controllerCollection.PatientRepo.CreatePathology)
+		pathology.POST("/create/:patientId", controllerCollection.PatientRepo.CreatePathology)
 	}
 	{
 		chatHistory.GET("/all", controllerCollection.DoctorPatientChatRepo.GetAllDoctorPatientMessage)
