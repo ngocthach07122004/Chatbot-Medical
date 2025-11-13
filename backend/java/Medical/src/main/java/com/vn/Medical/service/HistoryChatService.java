@@ -14,7 +14,9 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
+import java.sql.Timestamp;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
@@ -30,11 +32,13 @@ public class HistoryChatService {
     public HistoryChat createHistoryChat (HistoryChatRequest request) {
         HistoryChat historyChat = new HistoryChat();
         historyChat.setData(request.getData());
+        historyChat.setCreatedAt(LocalDateTime.now());
         historyChatRepository.save(historyChat);
         DoctorPatientChat doctorPatientChat = new DoctorPatientChat();
         doctorPatientChat.setDoctorId(request.getDoctorId());
         doctorPatientChat.setHistoryChatId(historyChat.getId());
         doctorPatientChat.setPatientId(request.getPatientId());
+        doctorPatientChat.setTime(LocalDate.now());
         doctorPatientChatRepository.save(doctorPatientChat);
         DoctorPatientChatDTO doctorPatientChatDTO = DoctorPatientChatDTO.builder()
                 .doctorId(doctorPatientChat.getDoctorId())
@@ -52,8 +56,33 @@ public class HistoryChatService {
             return hictoryChatResult;
         }
         Map<LocalDate,List<Long>> hictoryChatMap = new HashMap<>();
+//        for (Object[] row : hictoryChats) {
+//            hictoryChatMap.computeIfAbsent( (LocalDate) row[0], k -> new ArrayList<>()).add((Long)row[1]);
+//        }
         for (Object[] row : hictoryChats) {
-            hictoryChatMap.computeIfAbsent( (LocalDate) row[0], k -> new ArrayList<>()).add((Long)row[1]);
+//            Timestamp ts = (Timestamp) row[0];  // hoặc Date tùy vào DB
+//            LocalDate date = ts.toLocalDateTime().toLocalDate();
+//
+//            hictoryChatMap
+//                    .computeIfAbsent(date, k -> new ArrayList<>())
+//                    .add(((Number) row[1]).longValue());
+            Object timeObj = row[0];
+            LocalDate date;
+
+            if (timeObj instanceof java.sql.Timestamp ts) {
+                date = ts.toLocalDateTime().toLocalDate();
+            } else if (timeObj instanceof java.sql.Date d) {
+                date = d.toLocalDate();
+            } else {
+                throw new IllegalStateException("Unknown date type: " + timeObj.getClass());
+            }
+
+            Long chatId = ((Number) row[1]).longValue();
+
+            hictoryChatMap
+                    .computeIfAbsent(date, k -> new ArrayList<>())
+                    .add(chatId);
+
         }
         hictoryChatMap.forEach( (date,hictoryChatIds ) -> {
             List<HistoryChat> historyChatsRepsonse = historyChatRepository.getHistoryChatByIds(hictoryChatIds);

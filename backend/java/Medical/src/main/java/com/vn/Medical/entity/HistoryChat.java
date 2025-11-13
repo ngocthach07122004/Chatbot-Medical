@@ -1,11 +1,13 @@
 package com.vn.Medical.entity;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.vladmihalcea.hibernate.type.json.JsonType;
 import com.vn.Medical.helper.JsonNodeConverter;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
+import org.hibernate.annotations.Type;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -22,7 +24,7 @@ public class HistoryChat {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
     @Column(name = "data", columnDefinition = "jsonb")
-    @Convert(converter = JsonNodeConverter.class)
+    @Type(JsonType.class)
     JsonNode data;
     @Column(name = "createdAt")
     LocalDateTime createdAt;
