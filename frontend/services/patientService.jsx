@@ -21,5 +21,9 @@ const PatientService = {
     const res = await patientApi.post(`/pathology/create/${patientId}`, data);
     return res;
   },
+  async getPatientsByDoctorLightWeight(doctorId) {
+    const res = await patientApi.get(`/patient/doctor/lightweight/${doctorId}`);
+    return res.data;
+  },
 };
 export default PatientService;
