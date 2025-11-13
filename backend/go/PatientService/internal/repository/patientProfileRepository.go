@@ -11,6 +11,11 @@ import (
 	"gorm.io/gorm"
 )
 
+type PatientLightweight struct {
+    ID       uint   `json:"id"`
+    FullName string `json:"fullName"`
+}
+
 type PatientProfileRepo struct {
 	DB *gorm.DB
 }
@@ -129,6 +134,28 @@ func (patient *PatientProfileRepo) CreatePathology(c *gin.Context) {
 // func (patient *PatientProfileRepo) FindPathologyByIdPatient( c * gin.Context) {
 // 	  var Pa
 // }
+func (patient *PatientProfileRepo) GetListPatient( c * gin.Context) {
+	 doctorIdParam := c.Param("doctorId")
+	doctorId, err := strconv.ParseUint(doctorIdParam, 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid doctorId"})
+		return
+	}
+	var patients [] PatientLightweight
+	errorQuery := patient.DB.Model(&model.PatientProfile{}).Select("patient_profiles.id", "patient_profiles.full_name").
+	Joins("JOIN doctor_patient_chats dpc ON dpc.patient_id = patient_profiles.id").
+	Where("dpc.doctor_id = ?", doctorId).Find(&patients).Error
+	if errorQuery != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": errorQuery.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"status": 200, 
+		"data": patients,
+	})
+
+
+} 
 
 func (patient *PatientProfileRepo) FindPatientsByDoctor(c *gin.Context) {
 	doctorIdParam := c.Param("doctorId")
@@ -163,6 +190,7 @@ func (patient *PatientProfileRepo) FindPatientsByDoctor(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{
+		"status":    http.StatusOK,
 		"data":       patients,
 		"page":       page,
 		"limit":      limit,

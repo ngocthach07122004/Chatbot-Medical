@@ -16,6 +16,7 @@ func RouterConfig(router *gin.Engine, controllerCollection *initBean.ControllerC
 		patientRouter.GET("/doctor/:doctorId", controllerCollection.PatientRepo.FindPatientsByDoctor)
 		patientRouter.POST("/update/:patientId", controllerCollection.PatientRepo.UpdatePatient)
 		patientRouter.DELETE("/delete/:patientId", controllerCollection.PatientRepo.DeletePatient)
+		patientRouter.GET("/doctor/lightweight/:doctorId",controllerCollection.PatientRepo.GetListPatient)
 	}
 	{
 		pathology.POST("/create/:patientId", controllerCollection.PatientRepo.CreatePathology)
