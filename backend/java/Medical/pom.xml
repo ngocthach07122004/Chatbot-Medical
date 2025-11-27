@@ -38,10 +38,10 @@
 
         <!-- Database -->
         <dependency>
-            <groupId>org.postgresql</groupId>
-            <artifactId>postgresql</artifactId>
-            <version>42.7.7</version>
-<!--            <scope>runtime</scope>-->
+            <groupId>com.oracle.database.jdbc</groupId>
+            <artifactId>ojdbc11</artifactId>
+            <version>23.6.0.24.10</version>
+            <scope>runtime</scope>
         </dependency>
 
         <!-- Lombok -->
@@ -70,11 +70,6 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>io.github.cdimascio</groupId>
-            <artifactId>java-dotenv</artifactId>
-            <version>5.2.2</version>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
@@ -142,4 +137,44 @@
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <!-- Optional profile to reverse-engineer Oracle tables into JPA entities -->
+        <profile>
+            <id>oracle-entitygen</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.hibernate.orm.tooling</groupId>
+                        <artifactId>hibernate-tools-maven-plugin</artifactId>
+                        <version>6.5.2.Final</version>
+                        <configuration>
+                            <jdbcConfiguration>
+                                <property key="hibernate.dialect">org.hibernate.dialect.OracleDialect</property>
+                                <property key="hibernate.connection.driver_class">oracle.jdbc.OracleDriver</property>
+                                <property key="hibernate.connection.url">${oracle.codegen.url}</property>
+                                <property key="hibernate.connection.username">${oracle.codegen.username}</property>
+                                <property key="hibernate.connection.password">${oracle.codegen.password}</property>
+                                <reverseEngineeringSettings>
+                                    <tableFilter matchName="CLINICIAN_NOTE"/>
+                                    <tableFilter matchName="DICOM_FILE"/>
+                                    <tableFilter matchName="DICOM_INSTANCE"/>
+                                    <tableFilter matchName="DICOM_SERIES"/>
+                                    <tableFilter matchName="DICOM_STUDY"/>
+                                </reverseEngineeringSettings>
+                            </jdbcConfiguration>
+                            <componentPath>${project.basedir}/target/generated-sources/oracle</componentPath>
+                            <exporters>
+                                <exporter class="org.hibernate.tool.hbm2x.Cfg2JavaExporter">
+                                    <property key="jdk5">true</property>
+                                    <property key="ejb3">true</property>
+                                    <property key="packageName">com.vn.Medical.entity.oracle</property>
+                                </exporter>
+                            </exporters>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>
