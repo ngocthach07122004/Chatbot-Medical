@@ -20,6 +20,11 @@ const navObjects = [
     name: "Patients",
     url: "patients",
   },
+  {
+    id: 4,
+    name: "Patient Information",
+    url: "patient-information",
+  },
 ];
 export default function Header() {
   const navigate = useNavigate();
