@@ -5,10 +5,14 @@ import io.github.cdimascio.dotenv.Dotenv;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+import java.util.TimeZone;
+
 @SpringBootApplication
 public class MedicalApplication {
 
 	public static void main(String[] args) {
+
+            TimeZone.setDefault(TimeZone.getTimeZone("Asia/Ho_Chi_Minh"));
         Dotenv dotenv = Dotenv.load(); // load .env ở project root
         System.setProperty("DOCTOR_SERVICE_PORT", dotenv.get("DOCTOR_PORT"));
         System.setProperty("DB_HOST", dotenv.get("DB_HOST_DOCTOR"));
