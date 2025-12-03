@@ -43,6 +43,6 @@ func ConsumeHistoryChatTopic(DB *gorm.DB, kafkaAttribute *initBean.KafkaAttribut
 			HistoryChatID: &historyChatId,
 			DoctorID:    uint64(dto.DoctorID),
 		}
-		DB.Model(&model.DoctorPatientChat{}).Save(doctorPatientChat)
+		DB.Model(&model.DoctorPatientChat{}).Save(&doctorPatientChat)
 	}
 }
