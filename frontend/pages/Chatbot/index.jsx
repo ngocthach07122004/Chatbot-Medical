@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import styles from "./Chatbot.module.scss";
 import classNames from "classnames/bind";
 import PatientService from "../../services/patientService";
+import chatServiceApi from "../../services/chatServiceApi";
 import PatientListModal from "../../components/Form/PatientListModal";
 
 const cx = classNames.bind(styles);
@@ -10,108 +11,200 @@ const cx = classNames.bind(styles);
 const Chatbot = () => {
   const navigate = useNavigate();
 
-  // Helper to generate a greeting message
-  const makeGreeting = () => ({
-    id: Date.now(),
-    type: "bot",
-    text: "Hello! I'm your medical assistant. How can I help you today?",
-    timestamp: new Date(),
-  });
+  // --- States Dữ liệu ---
+  const [patients, setPatients] = useState([]); // Danh sách bệnh nhân cho Sidebar
+  const [messages, setMessages] = useState([]); // Tin nhắn hiển thị chính
 
-  // Seed a couple of sessions for the history sidebar (UI-only)
-  const initialSessions = [
-    {
-      id: "s1",
-      title: "Medical Consultation",
-      createdAt: new Date(Date.now() - 1000 * 60 * 60 * 3),
-      messages: [makeGreeting()],
-    },
-    {
-      id: "s2",
-      title: "Symptom Check",
-      createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24),
-      messages: [
-        {
-          id: Date.now() - 5,
-          type: "user",
-          text: "I have a mild fever and sore throat.",
-          timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24),
-        },
-        {
-          id: Date.now() - 4,
-          type: "bot",
-          text: "Those can be signs of a common cold or flu. Do you have any other symptoms?",
-          timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24),
-        },
-      ],
-    },
-  ];
+  // --- States Context ---
+  const [doctorId, setDoctorId] = useState("");
+  const [currentPatientId, setCurrentPatientId] = useState(null);
+  const [currentPatientName, setCurrentPatientName] = useState("");
 
-  const [sessions, setSessions] = useState(initialSessions);
-  const [currentSessionId, setCurrentSessionId] = useState(
-    initialSessions[0].id
-  );
-  const [messages, setMessages] = useState(initialSessions[0].messages);
+  // --- States UI ---
   const [inputValue, setInputValue] = useState("");
   const [isTyping, setIsTyping] = useState(false);
+  const [searchQuery, setSearchQuery] = useState(""); // Tìm kiếm trong sidebar
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
-  const [historyPulse, setHistoryPulse] = useState(false);
-  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
-  const [historyQuery, setHistoryQuery] = useState("");
-  const [isPatientChat, setIsPatientChat] = useState(false);
-  const [doctorId, setDoctorId] = useState("");
-  const [patients, setPatients] = useState([]);
+  const [isPatientModalOpen, setIsPatientModalOpen] = useState(false);
 
+  // --- REFS (Đã bổ sung đầy đủ) ---
   const messagesEndRef = useRef(null);
-  const inputRef = useRef(null);
-  const chatHistoryRef = useRef(null);
+  const chatHistoryRef = useRef(null); // <--- Đã thêm dòng này để fix lỗi
+  const inputRef = useRef(null);       // <--- Đã thêm dòng này
   const userMenuRef = useRef(null);
   const userProfileRef = useRef(null);
 
-  const getPatients = async () => {
-    try {
-      const response = await PatientService.getPatientsByDoctorLightWeight(
-        doctorId
-      );
-      if (response.status == 200) {
-        setPatients(response.data);
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
+  // 1. Kiểm tra Login & Init
   useEffect(() => {
     const isLogin = localStorage.getItem("isLogin");
-    const doctorId = localStorage.getItem("doctorId");
-    if (!isLogin || !doctorId) {
+    const storedDoctorId = localStorage.getItem("doctorId");
+    if (!isLogin || !storedDoctorId) {
       navigate("/login");
     }
-    setDoctorId(doctorId);
-  }, []);
+    setDoctorId(storedDoctorId);
+  }, [navigate]);
+
+  // 2. Lấy danh sách bệnh nhân (Sidebar)
+  const getPatients = async () => {
+    if (!doctorId) return;
+    try {
+      const response = await PatientService.getPatientsByDoctorLightWeight(doctorId);
+      const data = response.data || response;
+      if (Array.isArray(data)) {
+        setPatients(data);
+      }
+    } catch (error) {
+      console.log("Error fetching patients:", error);
+    }
+  };
 
   useEffect(() => {
     getPatients();
   }, [doctorId]);
 
+  // 3. Helper: Chuyển dữ liệu Backend (Map<Date, List>) -> UI Messages
+  const mapBackendToMessages = (backendData) => {
+    if (!backendData) return [];
+    let allMessages = [];
+
+    // Backend trả về: { "2025-12-03": [ {data: {user_question: "...", bot_answer: "..."}} ] }
+    Object.keys(backendData).forEach((dateKey) => {
+      const dailyChats = backendData[dateKey];
+      dailyChats.forEach((item) => {
+        const content = item.data;
+        // Tách thành 2 bong bóng chat: User và Bot
+        if (content.user_question) {
+          allMessages.push({
+            id: `u_${item.id}`,
+            type: "user",
+            text: content.user_question,
+            timestamp: new Date(content.timestamp || item.createdAt),
+          });
+        }
+        if (content.bot_answer) {
+          allMessages.push({
+            id: `b_${item.id}`,
+            type: "bot",
+            text: content.bot_answer,
+            timestamp: new Date(content.timestamp || item.createdAt),
+          });
+        }
+      });
+    });
+
+    // Sắp xếp theo thời gian tăng dần
+    return allMessages.sort((a, b) => a.timestamp - b.timestamp);
+  };
+
+  // 4. Xử lý chọn bệnh nhân từ Sidebar
+  const handleSelectPatient = async (patient) => {
+    setCurrentPatientId(patient.id);
+    setCurrentPatientName(patient.fullName || patient.name);
+    setMessages([]); // Xóa tin nhắn cũ
+    setIsTyping(true); // Hiển thị loading
+
+    try {
+      // Gọi API lấy lịch sử chat
+      const data = await chatServiceApi.getHistoryChatByPatient(doctorId, patient.id);
+
+      if (data && Object.keys(data).length > 0) {
+        const historyMsgs = mapBackendToMessages(data);
+        setMessages(historyMsgs);
+      } else {
+        // Nếu chưa có lịch sử, hiện lời chào
+        setMessages([{
+          id: "welcome",
+          type: "bot",
+          text: `Hello! I am ready to assist with patient: ${patient.fullName || patient.name}.`,
+          timestamp: new Date(),
+        }]);
+      }
+    } catch (error) {
+      console.error("Failed to fetch history:", error);
+    } finally {
+      setIsTyping(false);
+    }
+  };
+
+  // 5. Scroll xuống cuối
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
+  useEffect(() => { scrollToBottom(); }, [messages, isTyping]);
 
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
+  // 6. Gửi tin nhắn (Chat với AI)
+  const handleSendMessage = async (e) => {
+    e.preventDefault();
+    if (!inputValue.trim()) return;
 
-  // Close user menu when clicking outside
+    if (!currentPatientId) {
+      alert("Please select a patient from the sidebar first!");
+      return;
+    }
+
+    const userText = inputValue;
+    setInputValue("");
+    setIsTyping(true);
+
+    // Hiển thị tin nhắn User ngay lập tức (Optimistic UI)
+    const tempUserMsg = {
+      id: Date.now(),
+      type: "user",
+      text: userText,
+      timestamp: new Date(),
+    };
+    setMessages((prev) => [...prev, tempUserMsg]);
+
+    try {
+      const payload = {
+        doctorId: parseInt(doctorId),
+        patientId: parseInt(currentPatientId),
+        data: { question: userText },
+      };
+
+      const res = await chatServiceApi.saveChat(payload);
+
+      // Backend trả về: { entity: { data: { bot_answer: "..." } } }
+      if (res.data && res.data.entity) {
+        const returnData = res.data.entity.data;
+        const botMsg = {
+          id: res.data.entity.id,
+          type: "bot",
+          text: returnData.bot_answer,
+          timestamp: new Date(),
+        };
+        setMessages((prev) => [...prev, botMsg]);
+      }
+    } catch (error) {
+      console.error(error);
+      setMessages((prev) => [...prev, {
+        id: Date.now(),
+        type: "bot",
+        text: "Error: Could not connect to AI server.",
+        timestamp: new Date(),
+      }]);
+    } finally {
+      setIsTyping(false);
+    }
+  };
+
+  // --- Logic phụ trợ (Filter, Menu) ---
+  const filteredPatients = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return patients;
+    return patients.filter((p) =>
+        (p.fullName || p.name || "").toLowerCase().includes(q)
+    );
+  }, [patients, searchQuery]);
+
+  // Đóng menu user khi click ra ngoài
   useEffect(() => {
     if (!isUserMenuOpen) return;
     const handler = (e) => {
       const target = e.target;
       if (
-        userMenuRef.current &&
-        !userMenuRef.current.contains(target) &&
-        userProfileRef.current &&
-        !userProfileRef.current.contains(target)
+          userMenuRef.current && !userMenuRef.current.contains(target) &&
+          userProfileRef.current && !userProfileRef.current.contains(target)
       ) {
         setIsUserMenuOpen(false);
       }
@@ -120,377 +213,181 @@ const Chatbot = () => {
     return () => document.removeEventListener("mousedown", handler);
   }, [isUserMenuOpen]);
 
-  const handleSendMessage = (e) => {
-    e.preventDefault();
-    if (!inputValue.trim()) return;
-
-    // Add user message
-    const userMessage = {
-      id: Date.now(),
-      type: "user",
-      text: inputValue,
-      timestamp: new Date(),
-    };
-    // Update local messages state
-    setMessages((prev) => [...prev, userMessage]);
-    // Update the message list in the selected session
-    setSessions((prev) =>
-      prev.map((s) => {
-        if (s.id !== currentSessionId) return s;
-        const hadUserBefore = (s.messages || []).some((m) => m.type === "user");
-        const newTitle = hadUserBefore
-          ? s.title
-          : userMessage.text.trim().slice(0, 40) || s.title || "New Chat";
-        return {
-          ...s,
-          title: newTitle,
-          messages: [...s.messages, userMessage],
-        };
-      })
-    );
-    setInputValue("");
-    setIsTyping(true);
-
-    // Simulate bot response
-    setTimeout(() => {
-      const botMessage = {
-        id: Date.now() + 1,
-        type: "bot",
-        text: "Thank you for your message. As a medical assistant, I can help you with general health information, symptom assessment, and medical guidance. Please note that I'm not a replacement for professional medical advice.",
-        timestamp: new Date(),
-      };
-      // Update local messages state
-      setMessages((prev) => [...prev, botMessage]);
-      // Update the selected session as well
-      setSessions((prev) =>
-        prev.map((s) =>
-          s.id === currentSessionId
-            ? { ...s, messages: [...s.messages, botMessage] }
-            : s
-        )
-      );
-      setIsTyping(false);
-    }, 1500);
-  };
-
-  const handlePatientNewChat = () => {
-    const newSession = {
-      id: `s_${Math.random().toString(36).slice(2, 8)}`,
-      title: "New Chat",
-      createdAt: new Date(),
-      messages: [makeGreeting()],
-    };
-    setSessions((prev) => [newSession, ...prev]);
-    setCurrentSessionId(newSession.id);
-    setMessages(newSession.messages);
-    setIsPatientChat(false);
-  };
-  const handleNewChat = () => {
-    setIsPatientChat(true);
-  };
-
-  const handleSelectSession = (id) => {
-    setCurrentSessionId(id);
-    const found = sessions.find((s) => s.id === id);
-    if (found) {
-      setMessages(found.messages);
-    }
-  };
-
-  const openUserMenu = () => setIsUserMenuOpen((v) => !v);
-  const goProfile = () => {
-    setIsUserMenuOpen(false);
-    navigate("/profile");
-  };
-  const goHistory = () => {
-    setIsUserMenuOpen(false);
-    setIsHistoryOpen(true);
-    setHistoryQuery("");
-  };
-
-  const filteredSessions = useMemo(() => {
-    const q = historyQuery.trim().toLowerCase();
-    if (!q) return sessions;
-    return sessions.filter(
-      (s) =>
-        s.title.toLowerCase().includes(q) ||
-        (s.messages || []).some((m) => (m.text || "").toLowerCase().includes(q))
-    );
-  }, [sessions, historyQuery]);
-
-  const suggestedPrompts = [
-    "What are common symptoms of flu?",
-    "How can I improve my sleep quality?",
-    "Tell me about healthy eating habits",
-    "What should I do for a headache?",
-  ];
+  const openUserMenu = () => setIsUserMenuOpen(!isUserMenuOpen);
+  const goProfile = () => navigate("/profile");
 
   return (
-    <>
-      <div className={cx("chatbot_wrapper")}>
-        {/* Sidebar */}
-        <aside className={cx("sidebar")}>
-          <div className={cx("sidebar_header")}>
-            <button className={cx("new_chat_btn")} onClick={handleNewChat}>
-              <i className="fa-solid fa-plus"></i>
-              <span>New Chat</span>
-            </button>
-          </div>
+      <>
+        <div className={cx("chatbot_wrapper")}>
 
-          <div
-            className={cx("chat_history", historyPulse ? "pulse" : "")}
-            ref={chatHistoryRef}
-          >
-            <div className={cx("history_section")}>
-              <h3 className={cx("history_title")}>Recent</h3>
-              {sessions.map((s) => (
-                <div
-                  key={s.id}
-                  className={cx(
-                    "history_item",
-                    currentSessionId === s.id ? "active" : ""
-                  )}
-                  onClick={() => handleSelectSession(s.id)}
-                  role="button"
-                  tabIndex={0}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" || e.key === " ")
-                      handleSelectSession(s.id);
-                  }}
-                >
-                  <i className="fa-solid fa-message"></i>
-                  <span>{s.title}</span>
-                </div>
-              ))}
-              {sessions.length === 0 && (
-                <div className={cx("history_item")}>
-                  <i className="fa-solid fa-message"></i>
-                  <span>No conversations yet</span>
-                </div>
-              )}
-            </div>
-          </div>
-
-          <div className={cx("sidebar_footer")}>
-            <div
-              className={cx("user_profile")}
-              onClick={openUserMenu}
-              role="button"
-              tabIndex={0}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ") openUserMenu();
-              }}
-              ref={userProfileRef}
-              aria-haspopup="menu"
-              aria-expanded={isUserMenuOpen}
-              aria-label="Open user menu"
-            >
-              <div className={cx("avatar")}>
-                <i className="fa-solid fa-user"></i>
-              </div>
-              <span className={cx("username")}>Medical User</span>
-            </div>
-            {isUserMenuOpen && (
-              <div className={cx("user_menu")} ref={userMenuRef} role="menu">
-                <button
-                  className={cx("menu_item")}
-                  role="menuitem"
-                  onClick={goHistory}
-                >
-                  <i className="fa-solid fa-clock-rotate-left"></i>
-                  View chat history
-                </button>
-                <button
-                  className={cx("menu_item")}
-                  role="menuitem"
-                  onClick={goProfile}
-                >
-                  <i className="fa-solid fa-user-doctor"></i>
-                  View user profile
-                </button>
-              </div>
-            )}
-          </div>
-        </aside>
-
-        {/* Main Chat Area */}
-        <main className={cx("chat_main")}>
-          <div className={cx("chat_container")}>
-            {/* Messages */}
-            <div className={cx("messages_area")}>
-              {messages.map((message) => (
-                <div
-                  key={message.id}
-                  className={cx(
-                    "message",
-                    message.type === "user" ? "user_message" : "bot_message"
-                  )}
-                >
-                  <div className={cx("message_avatar")}>
-                    {message.type === "bot" ? (
-                      <i className="fa-solid fa-user-nurse"></i>
-                    ) : (
-                      <i className="fa-solid fa-user"></i>
-                    )}
-                  </div>
-                  <div className={cx("message_content")}>
-                    <div className={cx("message_text")}>{message.text}</div>
-                    <div className={cx("message_time")}>
-                      {message.timestamp.toLocaleTimeString([], {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
-                    </div>
-                  </div>
-                </div>
-              ))}
-
-              {isTyping && (
-                <div className={cx("message", "bot_message")}>
-                  <div className={cx("message_avatar")}>
-                    <i className="fa-solid fa-user-nurse"></i>
-                  </div>
-                  <div className={cx("message_content")}>
-                    <div className={cx("typing_indicator")}>
-                      <span></span>
-                      <span></span>
-                      <span></span>
-                    </div>
-                  </div>
-                </div>
-              )}
-              <div ref={messagesEndRef} />
-            </div>
-
-            {/* Suggested Prompts (show only if no user messages yet) */}
-            {messages.filter((m) => m.type === "user").length === 0 && (
-              <div className={cx("suggested_prompts")}>
-                <h3 className={cx("prompts_title")}>Suggested Questions</h3>
-                <div className={cx("prompts_grid")}>
-                  {suggestedPrompts.map((prompt, index) => (
-                    <button
-                      key={index}
-                      className={cx("prompt_card")}
-                      onClick={() => setInputValue(prompt)}
-                    >
-                      <i className="fa-solid fa-lightbulb"></i>
-                      <span>{prompt}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Input Area */}
-            <div className={cx("input_area")}>
-              <form className={cx("input_form")} onSubmit={handleSendMessage}>
-                <div className={cx("input_wrapper")}>
-                  <input
-                    ref={inputRef}
-                    type="text"
-                    className={cx("message_input")}
-                    placeholder="Ask me anything about your health..."
-                    value={inputValue}
-                    onChange={(e) => setInputValue(e.target.value)}
-                  />
-                  <button
-                    type="submit"
-                    className={cx(
-                      "send_btn",
-                      inputValue.trim() ? "active" : ""
-                    )}
-                    disabled={!inputValue.trim()}
-                  >
-                    <i className="fa-solid fa-paper-plane"></i>
-                  </button>
-                </div>
-              </form>
-              <div className={cx("input_footer")}>
-                <p>
-                  Medical chatbot can make mistakes. Always verify important
-                  information.
-                </p>
-              </div>
-            </div>
-          </div>
-        </main>
-      </div>
-      {/* History modal */}
-      {isHistoryOpen && (
-        <div
-          className={cx("modal_overlay")}
-          onClick={() => setIsHistoryOpen(false)}
-        >
-          <div
-            className={cx("modal_panel")}
-            role="dialog"
-            aria-modal="true"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className={cx("modal_header")}>
-              <h3>
-                <i className="fa-solid fa-clock-rotate-left"></i> Chat history
-              </h3>
-              <button
-                className={cx("icon_btn")}
-                onClick={() => setIsHistoryOpen(false)}
-                aria-label="Close"
-              >
-                <i className="fa-solid fa-xmark"></i>
-              </button>
-            </div>
-            <div className={cx("modal_body")}>
-              <div className={cx("history_search")}>
-                <i className="fa-solid fa-magnifying-glass"></i>
+          {/* === SIDEBAR: DANH SÁCH BỆNH NHÂN === */}
+          <aside className={cx("sidebar")}>
+            <div className={cx("sidebar_header")}>
+              {/* Thay nút New Chat bằng ô tìm kiếm bệnh nhân */}
+              <div className={cx("input_wrapper")} style={{borderRadius: '12px', padding: '8px 12px', border: '1px solid #e0e0e0'}}>
+                <i className="fa-solid fa-magnifying-glass" style={{color: '#888', marginRight: '8px'}}></i>
                 <input
-                  placeholder="Search by title or message"
-                  value={historyQuery}
-                  onChange={(e) => setHistoryQuery(e.target.value)}
-                  autoFocus
+                    style={{border: 'none', outline: 'none', background: 'transparent', width: '100%'}}
+                    placeholder="Search patient..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
                 />
               </div>
-              <div className={cx("history_list")}>
-                {filteredSessions.map((s) => (
-                  <button
-                    key={s.id}
-                    className={cx("history_row")}
-                    onClick={() => {
-                      handleSelectSession(s.id);
-                      setIsHistoryOpen(false);
-                    }}
-                  >
-                    <div className={cx("row_title")}>{s.title}</div>
-                    <div className={cx("row_meta")}>
-                      <span>
-                        <i className="fa-regular fa-clock" />{" "}
-                        {new Date(s.createdAt).toLocaleString()}
-                      </span>
-                      <span>• {s.messages.length} messages</span>
+            </div>
+
+            <div className={cx("chat_history")} ref={chatHistoryRef}>
+              <div className={cx("history_section")}>
+                <h3 className={cx("history_title")}>My Patients</h3>
+
+                {filteredPatients.map((patient) => (
+                    <div
+                        key={patient.id}
+                        className={cx(
+                            "history_item",
+                            currentPatientId === patient.id ? "active" : ""
+                        )}
+                        onClick={() => handleSelectPatient(patient)}
+                    >
+                      <i className="fa-solid fa-user-injured" style={{color: currentPatientId === patient.id ? '#007bff' : '#666'}}></i>
+                      <span style={{ marginLeft: '8px' }}>
+                     {patient.fullName || patient.name}
+                  </span>
                     </div>
-                    <div className={cx("row_preview")}>
-                      {s.messages[0]?.text?.slice(0, 80)}
-                      {(s.messages[0]?.text?.length || 0) > 80 ? "…" : ""}
-                    </div>
-                  </button>
                 ))}
-                {filteredSessions.length === 0 && (
-                  <div className={cx("empty_center")}>
-                    No results. Try a different keyword.
-                  </div>
+
+                {filteredPatients.length === 0 && (
+                    <div style={{textAlign: 'center', color: '#999', padding: '20px'}}>
+                      No patients found
+                    </div>
                 )}
               </div>
             </div>
-          </div>
+
+            <div className={cx("sidebar_footer")}>
+              <div
+                  className={cx("user_profile")}
+                  onClick={openUserMenu}
+                  ref={userProfileRef}
+              >
+                <div className={cx("avatar")}>
+                  <i className="fa-solid fa-user-doctor"></i>
+                </div>
+                <span className={cx("username")}>Doctor</span>
+              </div>
+              {isUserMenuOpen && (
+                  <div className={cx("user_menu")} ref={userMenuRef}>
+                    <button className={cx("menu_item")} onClick={goProfile}>
+                      <i className="fa-solid fa-user-doctor"></i> View Profile
+                    </button>
+                  </div>
+              )}
+            </div>
+          </aside>
+
+          {/* === MAIN CHAT AREA === */}
+          <main className={cx("chat_main")}>
+            <div className={cx("chat_container")}>
+
+              {/* Khu vực Tin nhắn */}
+              <div className={cx("messages_area")}>
+                {currentPatientId ? (
+                    <>
+                      <div style={{textAlign: 'center', paddingBottom: '16px', color: '#666', fontSize: '0.9rem'}}>
+                        Talking with: <strong>{currentPatientName}</strong>
+                      </div>
+
+                      {messages.map((message) => (
+                          <div
+                              key={message.id}
+                              className={cx(
+                                  "message",
+                                  message.type === "user" ? "user_message" : "bot_message"
+                              )}
+                          >
+                            <div className={cx("message_avatar")}>
+                              {message.type === "bot" ? (
+                                  <i className="fa-solid fa-robot"></i>
+                              ) : (
+                                  <i className="fa-solid fa-user-doctor"></i>
+                              )}
+                            </div>
+                            <div className={cx("message_content")}>
+                              <div className={cx("message_text")}>{message.text}</div>
+                              <div className={cx("message_time")}>
+                                {message.timestamp.toLocaleString([], {
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                  day: "2-digit",
+                                  month: "2-digit"
+                                })}
+                              </div>
+                            </div>
+                          </div>
+                      ))}
+
+                      {isTyping && (
+                          <div className={cx("message", "bot_message")}>
+                            <div className={cx("message_avatar")}>
+                              <i className="fa-solid fa-robot"></i>
+                            </div>
+                            <div className={cx("message_content")}>
+                              <div className={cx("typing_indicator")}>
+                                <span></span><span></span><span></span>
+                              </div>
+                            </div>
+                          </div>
+                      )}
+                      <div ref={messagesEndRef} />
+                    </>
+                ) : (
+                    <div style={{height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: '#888'}}>
+                      <i className="fa-solid fa-comments" style={{fontSize: '4rem', marginBottom: '1rem', opacity: 0.5}}></i>
+                      <h3>Select a patient to view history</h3>
+                    </div>
+                )}
+              </div>
+
+              {/* Khu vực Input */}
+              <div className={cx("input_area")}>
+                <form className={cx("input_form")} onSubmit={handleSendMessage}>
+                  <div className={cx("input_wrapper")}>
+                    <input
+                        ref={inputRef}
+                        type="text"
+                        className={cx("message_input")}
+                        placeholder={currentPatientId ? `Ask about ${currentPatientName}...` : "Select a patient first..."}
+                        value={inputValue}
+                        onChange={(e) => setInputValue(e.target.value)}
+                        disabled={!currentPatientId}
+                    />
+                    <button
+                        type="submit"
+                        className={cx(
+                            "send_btn",
+                            inputValue.trim() ? "active" : ""
+                        )}
+                        disabled={!inputValue.trim()}
+                    >
+                      <i className="fa-solid fa-paper-plane"></i>
+                    </button>
+                  </div>
+                </form>
+                <div className={cx("input_footer")}>
+                  <p>AI can make mistakes. Please verify important medical info.</p>
+                </div>
+              </div>
+            </div>
+          </main>
         </div>
-      )}
-      {isPatientChat && (
-        <PatientListModal
-          patients={patients}
-          setShowForm={setIsPatientChat}
-          handlePatientChat={handlePatientNewChat}
-        />
-      )}
-    </>
+
+        {isPatientModalOpen && (
+            <PatientListModal
+                patients={patients}
+                setShowForm={setIsPatientModalOpen}
+                handlePatientChat={handleSelectPatient}
+            />
+        )}
+      </>
   );
 };
 
