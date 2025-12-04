@@ -47,6 +47,14 @@ public class AnalyticsController {
         }
         responseData.put("ageStats", ageStats);
 
+        // Thống kê nhóm bệnh (Disease Categories)
+        List<Object[]> diseaseList = researchCaseRepository.countByDiseaseCategory(); // Nhớ thêm hàm này vào Repository như ở trên
+        Map<String, Long> diseaseStats = new HashMap<>();
+        for (Object[] row : diseaseList) {
+            diseaseStats.put((String) row[0], ((Number) row[1]).longValue());
+        }
+        responseData.put("diseaseStats", diseaseStats);
+
         return ApiResponse.<Map<String, Object>>builder()
                 .code("200")
                 .message("Success")
