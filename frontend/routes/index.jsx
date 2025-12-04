@@ -8,6 +8,7 @@ import Chatbot from "../pages/Chatbot";
 import DoctorProfile from "../pages/DoctorProfile";
 import Patients from "../pages/Patients";
 import PatientDetail from "../pages/PatientDetail";
+import Analytics from "../pages/Analytics";
 
 const router = createBrowserRouter([
     {
@@ -21,6 +22,7 @@ const router = createBrowserRouter([
             { path: "chatbot/", element: <Chatbot /> },
             { path: "profile/", element: <DoctorProfile /> },
             { path: "patients/", element: <Patients /> },
+            { path: "analytics/", element: <Analytics /> },
             { path: "patients/:id/", element: <PatientDetail /> },
         ]
     }
