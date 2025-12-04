@@ -18,7 +18,7 @@ public class AnalyticsController {
 
     private final ResearchCaseRepository researchCaseRepository;
 
-    // private final MedicalArticleRepository medicalArticleRepository;
+    private final MedicalArticleRepository articleRepo;
 
     @GetMapping("/dashboard")
     public ApiResponse<Map<String, Object>> getDashboardStats() {
