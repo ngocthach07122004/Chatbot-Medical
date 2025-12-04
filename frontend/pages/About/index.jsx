@@ -11,7 +11,7 @@ const About = () => {
                 <div className={cx("header_content")}>
                     <h1 className={cx("header_title")}>About Us</h1>
                     <p className={cx("header_description")}>
-                        Revolutionizing healthcare with AI-powered medical assistance
+                        Building an AI-powered medical Q&A system using Bi-Encoder Retrieval and Cross-Encoder Reranking
                     </p>
                 </div>
             </section>
@@ -23,15 +23,14 @@ const About = () => {
                         <div className={cx("mission_text")}>
                             <h2 className={cx("section_title")}>Our Mission</h2>
                             <p className={cx("section_description")}>
-                                We believe that quality healthcare information should be accessible
-                                to everyone, anytime, anywhere. Our mission is to empower individuals
-                                with reliable medical knowledge through cutting-edge AI technology,
-                                helping them make informed decisions about their health and wellbeing.
+                                As part of the Data Warehouse and Decision Support Systems course (CO4031) at Ho Chi Minh City University of Technology,
+                                our mission is to design and build a reliable medical question-answering system that leverages advanced AI techniques
+                                to provide accurate health information from trusted sources like OpenFDA and PMC-Patients.
                             </p>
                             <p className={cx("section_description")}>
-                                Our advanced medical chatbot combines the latest in artificial
-                                intelligence with comprehensive medical databases to provide accurate,
-                                timely, and personalized health guidance.
+                                Our system combines multi-source retrieval, knowledge synthesis, and generative responses to bridge the gap between
+                                complex medical knowledge and everyday users, supporting informed health decisions while addressing challenges in
+                                data processing and semantic understanding.
                             </p>
                         </div>
                         <div className={cx("mission_icon")}>
@@ -50,10 +49,9 @@ const About = () => {
                             <div className={cx("value_icon")}>
                                 <i className="fa-solid fa-heart"></i>
                             </div>
-                            <h3 className={cx("value_title")}>Patient-Centered</h3>
+                            <h3 className={cx("value_title")}>User-Focused</h3>
                             <p className={cx("value_description")}>
-                                We prioritize the needs and wellbeing of our users in every
-                                decision we make.
+                                We prioritize delivering helpful and accessible medical information for patients, healthcare workers, and the general public.
                             </p>
                         </div>
 
@@ -63,8 +61,7 @@ const About = () => {
                             </div>
                             <h3 className={cx("value_title")}>Innovation</h3>
                             <p className={cx("value_description")}>
-                                We continuously improve our technology to provide the best
-                                medical assistance possible.
+                                We employ cutting-edge techniques like Bi-Encoder and Cross-Encoder to enhance retrieval accuracy in medical domains.
                             </p>
                         </div>
 
@@ -72,10 +69,9 @@ const About = () => {
                             <div className={cx("value_icon")}>
                                 <i className="fa-solid fa-lock"></i>
                             </div>
-                            <h3 className={cx("value_title")}>Privacy</h3>
+                            <h3 className={cx("value_title")}>Data Integrity</h3>
                             <p className={cx("value_description")}>
-                                We maintain the highest standards of data security and user
-                                confidentiality.
+                                We maintain high standards in data processing using Medallion Architecture and ensure ethical handling of medical information.
                             </p>
                         </div>
 
@@ -85,8 +81,7 @@ const About = () => {
                             </div>
                             <h3 className={cx("value_title")}>Accuracy</h3>
                             <p className={cx("value_description")}>
-                                We ensure all medical information is verified and based on
-                                evidence-based research.
+                                All responses are based on verified sources and advanced retrieval methods to minimize errors and hallucinations.
                             </p>
                         </div>
                     </div>
@@ -98,37 +93,46 @@ const About = () => {
                 <div className={cx("container")}>
                     <h2 className={cx("section_title", "center")}>Our Team</h2>
                     <p className={cx("team_intro")}>
-                        A passionate group of medical professionals, AI researchers, and
-                        software engineers dedicated to transforming healthcare accessibility.
+                        A group of dedicated Computer Science students from Ho Chi Minh City University of Technology, passionate about applying data engineering and AI to healthcare challenges.
                     </p>
-                    <div className={cx("team_grid")}>
+                    <div className={cx("values_grid")}>
                         <div className={cx("team_card")}>
                             <div className={cx("team_avatar")}>
-                                <i className="fa-solid fa-user-tie"></i>
+                                <i className="fa-solid fa-user-graduate"></i>
                             </div>
-                            <h3 className={cx("team_name")}>Medical Experts</h3>
+                            <h3 className={cx("team_name")}>Nguyễn Đình Đức</h3>
                             <p className={cx("team_description")}>
-                                Board-certified physicians and healthcare specialists
+                                Student ID: 2210794
                             </p>
                         </div>
 
                         <div className={cx("team_card")}>
                             <div className={cx("team_avatar")}>
-                                <i className="fa-solid fa-laptop-code"></i>
+                                <i className="fa-solid fa-user-graduate"></i>
                             </div>
-                            <h3 className={cx("team_name")}>AI Engineers</h3>
+                            <h3 className={cx("team_name")}>Huỳnh Ngọc Duy Khương</h3>
                             <p className={cx("team_description")}>
-                                Leading experts in machine learning and natural language processing
+                                Student ID: 2211710
                             </p>
                         </div>
 
                         <div className={cx("team_card")}>
                             <div className={cx("team_avatar")}>
-                                <i className="fa-solid fa-users"></i>
+                                <i className="fa-solid fa-user-graduate"></i>
                             </div>
-                            <h3 className={cx("team_name")}>Support Team</h3>
+                            <h3 className={cx("team_name")}>Nguyễn Trần Minh Tâm</h3>
                             <p className={cx("team_description")}>
-                                Dedicated professionals ensuring the best user experience
+                                Student ID: 2213035
+                            </p>
+                        </div>
+
+                        <div className={cx("team_card")}>
+                            <div className={cx("team_avatar")}>
+                                <i className="fa-solid fa-user-graduate"></i>
+                            </div>
+                            <h3 className={cx("team_name")}>Huỳnh Ngọc Thạch</h3>
+                            <p className={cx("team_description")}>
+                                Student ID: 2213173 
                             </p>
                         </div>
                     </div>
