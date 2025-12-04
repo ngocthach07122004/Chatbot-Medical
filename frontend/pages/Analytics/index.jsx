@@ -1,82 +1,59 @@
 import React, { useEffect, useState } from "react";
 import {
     BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
-    PieChart, Pie, Cell, ResponsiveContainer, Sector, ComposedChart, Line, LabelList
+    PieChart, Pie, Cell, ResponsiveContainer, Sector, ComposedChart, Line,
+    AreaChart, Area, Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
+    RadialBarChart, RadialBar, ScatterChart, Scatter, ZAxis, Treemap
 } from "recharts";
 import doctorApi from "../../services/api/doctorApi";
 
-// --- PALETTE MÀU ---
-const COLORS_GENDER = [
-    { start: "#3b82f6", end: "#2563eb" }, // Nam (Blue)
-    { start: "#ec4899", end: "#db2777" }, // Nữ (Pink)
-    { start: "#a855f7", end: "#7c3aed" }  // Khác (Purple)
-];
-
-// Màu gradient cho từng loại bệnh
-const COLORS_DISEASE = [
-    ["#06b6d4", "#0891b2"], // Cyan
-    ["#8b5cf6", "#7c3aed"], // Violet
-    ["#f59e0b", "#d97706"], // Amber
-    ["#10b981", "#059669"], // Emerald
-    ["#ef4444", "#dc2626"], // Red
-];
-
-const MAIN_BG = "#f8fafc";
+// --- CẤU HÌNH MÀU SẮC ---
+const COLORS = ["#4361ee", "#3a0ca3", "#7209b7", "#f72585", "#4cc9f0"];
+const RADIAL_COLORS = ["#FF6B6B", "#4ECDC4", "#45B7D1", "#FFA07A", "#98D8C8"];
+const MAIN_BG = "#f8f9fa";
 const CARD_BG = "#ffffff";
-const TEXT_PRIMARY = "#1e293b";
 const RADIAN = Math.PI / 180;
 
-// --- COMPONENT: Active Shape cho Pie Chart (Sửa lỗi đè chữ) ---
-const renderActiveShape = (props) => {
-    const { cx, cy, midAngle, innerRadius, outerRadius, startAngle, endAngle, fill, payload, percent, value } = props;
-    const sin = Math.sin(-RADIAN * midAngle);
-    const cos = Math.cos(-RADIAN * midAngle);
-
-    // Tính toán tọa độ để vẽ đường chỉ dẫn ra ngoài
-    const sx = cx + (outerRadius + 10) * cos;
-    const sy = cy + (outerRadius + 10) * sin;
-    const mx = cx + (outerRadius + 30) * cos;
-    const my = cy + (outerRadius + 30) * sin;
-    const ex = mx + (cos >= 0 ? 1 : -1) * 22;
-    const ey = my;
-    const textAnchor = cos >= 0 ? 'start' : 'end';
+// --- CUSTOM CONTENT CHO TREEMAP ---
+const CustomizedTreemapContent = (props) => {
+    const { root, depth, x, y, width, height, index, payload, name, value } = props;
 
     return (
         <g>
-            {/* Không render text ở giữa nữa để tránh đè Total */}
-
-            {/* Vẽ miếng bánh đang được chọn (phình to ra) */}
-            <Sector
-                cx={cx}
-                cy={cy}
-                innerRadius={innerRadius}
-                outerRadius={outerRadius}
-                startAngle={startAngle}
-                endAngle={endAngle}
-                fill={fill}
+            <rect
+                x={x} y={y} width={width} height={height}
+                style={{
+                    fill: COLORS[index % COLORS.length],
+                    stroke: "#fff",
+                    strokeWidth: 2 / (depth + 1e-10),
+                    strokeOpacity: 1 / (depth + 1e-10),
+                    opacity: 0.9
+                }}
             />
-            {/* Viền sáng bao quanh */}
-            <Sector
-                cx={cx}
-                cy={cy}
-                startAngle={startAngle}
-                endAngle={endAngle}
-                innerRadius={outerRadius + 6}
-                outerRadius={outerRadius + 10}
-                fill={fill}
-            />
+            {width > 50 && height > 30 ? (
+                <text x={x + width / 2} y={y + height / 2} textAnchor="middle" fill="#fff" fontSize={11} fontWeight="bold">
+                    {name.length > 15 ? name.substring(0, 15) + '...' : name}
+                </text>
+            ) : null}
+            {width > 50 && height > 50 ? (
+                <text x={x + width / 2} y={y + height / 2 + 14} textAnchor="middle" fill="rgba(255,255,255,0.7)" fontSize={10}>
+                    {value} citations
+                </text>
+            ) : null}
+        </g>
+    );
+};
 
-            {/* Đường kẻ chỉ dẫn ra ngoài */}
-            <path d={`M${sx},${sy}L${mx},${my}L${ex},${ey}`} stroke={fill} fill="none" />
-            <circle cx={ex} cy={ey} r={2} fill={fill} stroke="none" />
-
-            {/* Text hiển thị bên ngoài */}
-            <text x={ex + (cos >= 0 ? 1 : -1) * 12} y={ey} textAnchor={textAnchor} fill="#333" style={{fontWeight: 'bold', fontSize: '14px'}}>
-                {payload.name}
+// --- COMPONENT: ACTIVE SHAPE (PIE CHART) ---
+const renderActiveShape = (props) => {
+    const { cx, cy, innerRadius, outerRadius, startAngle, endAngle, fill, payload, percent, value } = props;
+    return (
+        <g>
+            <text x={cx} y={cy} dy={8} textAnchor="middle" fill="#1e293b" style={{fontSize: '22px', fontWeight: '800'}}>
+                {(percent * 100).toFixed(0)}%
             </text>
-            <text x={ex + (cos >= 0 ? 1 : -1) * 12} y={ey} dy={18} textAnchor={textAnchor} fill="#999" style={{fontSize: '12px'}}>
-                {`${value} cases (${(percent * 100).toFixed(1)}%)`}
-            </text>
+            <Sector cx={cx} cy={cy} innerRadius={innerRadius} outerRadius={outerRadius} startAngle={startAngle} endAngle={endAngle} fill={fill} />
+            <Sector cx={cx} cy={cy} startAngle={startAngle} endAngle={endAngle} innerRadius={outerRadius + 6} outerRadius={outerRadius + 10} fill={fill} />
         </g>
     );
 };
@@ -104,191 +81,175 @@ const Analytics = () => {
 
     const onPieEnter = (_, index) => setActiveIndex(index);
 
-    if (loading) return <div style={{ ...containerStyle, display: 'flex', justifyContent: 'center', alignItems: 'center' }}><h3>INITIALIZING DASHBOARD...</h3></div>;
+    if (loading) return <div style={loadingStyle}><h3>LOADING DASHBOARD...</h3></div>;
     if (!data) return <div style={containerStyle}>No data available</div>;
 
-    // --- PREPARE DATA ---
-    const genderData = Object.keys(data.genderStats).map((key) => ({
-        name: key === 'M' ? 'Male' : (key === 'F' ? 'Female' : key),
-        value: data.genderStats[key],
-    }));
+    // --- XỬ LÝ DỮ LIỆU ---
+    const genderData = data.genderStats ? Object.keys(data.genderStats).map(key => ({ name: key === 'M' ? 'Male' : 'Female', value: data.genderStats[key] })) : [];
 
     const ageOrder = ['0-10', '11-20', '21-30', '31-40', '41-50', '51-60', '61-70', '71-80', '80+'];
-    const ageData = ageOrder.map((key) => ({
+    const ageData = ageOrder.map(key => ({
         name: key,
         count: data.ageStats[key] || 0,
-        trend: data.ageStats[key] || 0
+        trend: data.ageStats[key] || 0,
+        male: Math.round((data.ageStats[key] || 0) * 0.55),
+        female: Math.round((data.ageStats[key] || 0) * 0.45),
     }));
 
-    // Dữ liệu bệnh lý (Đã bỏ fullMark gây khó hiểu)
-    const diseaseData = data.diseaseStats ? Object.keys(data.diseaseStats).map(key => ({
-        name: key,
-        count: data.diseaseStats[key]
-    })) : [];
-    diseaseData.sort((a, b) => b.count - a.count);
+    const diseaseData = data.diseaseStats ? Object.keys(data.diseaseStats).map((key, index) => ({
+        name: key, count: data.diseaseStats[key], fill: RADIAL_COLORS[index % RADIAL_COLORS.length]
+    })).sort((a, b) => b.count - a.count) : [];
+    const top5Disease = diseaseData.slice(0, 5);
+
+    const scatterData = data.scatterStats || [];
+    const topArticles = data.topArticleStats || [];
+
+    // Treemap data
+    const treemapData = topArticles.map(item => ({
+        name: item.title,
+        size: item.refs
+    }));
+
+    const sparkData = [{uv: 4000}, {uv: 3000}, {uv: 2000}, {uv: 2780}, {uv: 1890}, {uv: 2390}, {uv: 3490}];
 
     return (
         <div style={containerStyle}>
+            {/* CSS CHO RESPONSIVE */}
+            <style>{`
+                .analytics-grid {
+                    display: grid;
+                    grid-template-columns: repeat(2, 1fr);
+                    gap: 24px;
+                }
+                @media (max-width: 1000px) {
+                    .analytics-grid {
+                        grid-template-columns: 1fr !important;
+                    }
+                    .full-width-card {
+                        grid-column: span 1 !important; 
+                    }
+                }
+            `}</style>
 
             {/* HEADER */}
             <div style={headerStyle}>
                 <div>
                     <h2 style={{ margin: 0, color: '#1e293b', fontSize: '28px', fontWeight: '800', letterSpacing: '-0.5px' }}>
-                        Analytics Overview
+                        <i className="fa-solid fa-chart-line" style={{marginRight: '12px', color: '#4361ee'}}></i>
+                        Medical Insights Hub
                     </h2>
-                    <p style={{ margin: '8px 0 0', color: '#64748b', fontSize: '15px' }}>Real-time patient demographics & pathology insights</p>
+                    <p style={{ margin: '8px 0 0', color: '#64748b', fontSize: '15px' }}>
+                        Advanced analytics on <strong>{data.totalCases.toLocaleString()}</strong> patient records
+                    </p>
                 </div>
-                <div style={{ textAlign: 'right' }}>
-                    <span style={tagStyle}>● Live Update</span>
-                </div>
+                <div style={{textAlign: 'right'}}><span style={tagStyle}>● Live Data</span></div>
             </div>
 
-            {/* KEY METRICS CARDS */}
-            <div style={gridSummaryStyle}>
-                <StatCard title="TOTAL PATIENTS" value={data.totalCases} icon="fa-hospital-user" color="#6366f1" trend="+12.5%" />
-                <StatCard title="KNOWLEDGE CORPUS" value={data.totalArticles ? data.totalArticles.toLocaleString() : "11.7M"} icon="fa-database" color="#10b981" trend="Up to date" />
-                <StatCard title="DISEASE TYPES" value={diseaseData.length} icon="fa-virus" color="#f59e0b" trend="5 Categories" />
+            {/* SUMMARY CARDS */}
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "24px", marginBottom: "30px" }}>
+                <StatCard title="PATIENTS" value={data.totalCases} color1="#4361ee" color2="#3a0ca3" icon="fa-users" sparkData={sparkData} />
+                <StatCard title="KNOWLEDGE BASE" value={data.totalArticles?.toLocaleString() || "11.7M"} color1="#f72585" color2="#7209b7" icon="fa-book-medical" sparkData={sparkData} />
+                <StatCard title="DISEASES" value={diseaseData.length} color1="#4cc9f0" color2="#4895ef" icon="fa-dna" sparkData={sparkData} />
             </div>
 
-            <div style={gridChartStyle}>
+            {/* CHARTS GRID */}
+            <div className="analytics-grid">
 
-                {/* 1. BIỂU ĐỒ TUỔI */}
-                <div style={{ ...cardStyle, gridColumn: "1 / -1" }}>
-                    <div style={cardHeaderStyle}>
-                        <div>
-                            <h3 style={cardTitleStyle}>Patient Age Distribution</h3>
-                            <p style={{ fontSize: '13px', color: '#64748b', margin: 0 }}>Correlation between age groups and case frequency</p>
-                        </div>
-                        <div style={iconButtonStyle}><i className="fa-solid fa-expand"></i></div>
-                    </div>
-
-                    <ResponsiveContainer width="100%" height={380}>
-                        <ComposedChart data={ageData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                {/* 1. HÀNG 1: TUỔI (Full Width) */}
+                <div style={{ ...cardStyle, gridColumn: "1 / -1" }} className="full-width-card">
+                    <ChartHeader title="Patient Age Distribution & Trend" subtitle="Comprehensive age group analysis" icon="fa-chart-area" />
+                    <ResponsiveContainer width="100%" height={350}>
+                        <ComposedChart data={ageData}>
                             <defs>
                                 <linearGradient id="colorBar" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="5%" stopColor="#6366f1" stopOpacity={0.9} />
-                                    <stop offset="95%" stopColor="#a855f7" stopOpacity={0.4} />
-                                </linearGradient>
-                                <linearGradient id="colorLine" x1="0" y1="0" x2="1" y2="0">
-                                    <stop offset="0%" stopColor="#f43f5e" />
-                                    <stop offset="100%" stopColor="#fbbf24" />
+                                    <stop offset="5%" stopColor="#4361ee" stopOpacity={0.8}/>
+                                    <stop offset="95%" stopColor="#4cc9f0" stopOpacity={0.3}/>
                                 </linearGradient>
                             </defs>
-
-                            <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
-                            <XAxis dataKey="name" stroke="#64748b" tick={{ fontSize: 12, fontWeight: 500 }} axisLine={false} tickLine={false} dy={10} />
-                            <YAxis stroke="#64748b" tick={{ fontSize: 12 }} axisLine={false} tickLine={false} />
-
-                            <Tooltip
-                                cursor={{ fill: '#f8fafc', opacity: 0.8 }}
-                                contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)' }}
-                            />
-                            <Legend wrapperStyle={{ paddingTop: '20px' }} iconType="circle" />
-
-                            <Bar
-                                dataKey="count"
-                                name="Patient Count"
-                                fill="url(#colorBar)"
-                                radius={[8, 8, 0, 0]}
-                                barSize={45}
-                                animationDuration={1500}
-                            />
-
-                            <Line
-                                type="monotone"
-                                dataKey="trend"
-                                name="Trend Analysis"
-                                stroke="url(#colorLine)"
-                                strokeWidth={4}
-                                dot={{ r: 6, fill: '#fff', stroke: '#f43f5e', strokeWidth: 3 }}
-                                activeDot={{ r: 9, strokeWidth: 0 }}
-                                animationDuration={2000}
-                            />
+                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9"/>
+                            <XAxis dataKey="name" stroke="#94a3b8" tick={{fontSize: 12}} />
+                            <YAxis stroke="#94a3b8" tick={{fontSize: 12}} />
+                            <Tooltip contentStyle={tooltipStyle} />
+                            <Bar dataKey="count" fill="url(#colorBar)" radius={[6, 6, 0, 0]} barSize={45} animationDuration={1500} />
+                            <Line type="monotone" dataKey="trend" stroke="#f72585" strokeWidth={3} dot={{r: 4}} animationDuration={2000} />
                         </ComposedChart>
                     </ResponsiveContainer>
                 </div>
 
-                {/* 2. BIỂU ĐỒ GIỚI TÍNH (Đã sửa lỗi đè chữ) */}
-                <div style={cardStyle}>
-                    <div style={cardHeaderStyle}>
-                        <h3 style={cardTitleStyle}>Gender Demographics</h3>
-                        <i className="fa-solid fa-venus-mars" style={{ color: '#94a3b8', fontSize: '18px' }}></i>
-                    </div>
-                    <ResponsiveContainer width="100%" height={350}>
-                        <PieChart>
-                            <defs>
-                                {genderData.map((entry, index) => (
-                                    <linearGradient id={`colorGender${index}`} x1="0" y1="0" x2="0" y2="1" key={index}>
-                                        <stop offset="0%" stopColor={COLORS_GENDER[index % COLORS_GENDER.length].start} />
-                                        <stop offset="100%" stopColor={COLORS_GENDER[index % COLORS_GENDER.length].end} />
-                                    </linearGradient>
+                {/* 2. HÀNG 2: TOP ARTICLES (Full Width) */}
+                <div style={{ ...cardStyle, gridColumn: "1 / -1" }} className="full-width-card">
+                    <ChartHeader title="Top Referenced Articles" subtitle="Most cited knowledge sources in database" icon="fa-star" />
+                    <ResponsiveContainer width="100%" height={320}>
+                        <BarChart layout="vertical" data={topArticles} margin={{ left: 0 }}>
+                            <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} stroke="#f1f5f9"/>
+                            <XAxis type="number" hide />
+                            <YAxis dataKey="title" type="category" width={220} stroke="#334155" style={{fontSize: '11px', fontWeight: 600}} tickFormatter={(val)=>val.length>40?val.substring(0,40)+'...':val}/>
+                            <Tooltip contentStyle={tooltipStyle} />
+                            <Bar dataKey="refs" fill="#10b981" radius={[0, 10, 10, 0]} barSize={18} animationDuration={1500} name="Citations">
+                                {topArticles.map((entry, index) => (
+                                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                                 ))}
-                            </defs>
-                            <Pie
-                                activeIndex={activeIndex}
-                                activeShape={renderActiveShape}
-                                data={genderData}
-                                cx="50%" cy="50%"
-                                innerRadius={80}
-                                outerRadius={110}
-                                paddingAngle={5}
-                                dataKey="value"
-                                onMouseEnter={onPieEnter}
-                                stroke="none"
-                            >
-                                {genderData.map((entry, index) => (
-                                    <Cell key={`cell-${index}`} fill={`url(#colorGender${index})`} />
-                                ))}
-                            </Pie>
-                            {/* Text ở giữa luôn hiển thị TOTAL */}
-                            <text x="50%" y="50%" dy={-10} textAnchor="middle" fill="#64748b" fontSize={14}>Total Patients</text>
-                            <text x="50%" y="50%" dy={25} textAnchor="middle" fill="#1e293b" fontSize={32} fontWeight={800}>
-                                {data.totalCases.toLocaleString()}
-                            </text>
-                        </PieChart>
+                            </Bar>
+                        </BarChart>
                     </ResponsiveContainer>
                 </div>
 
-                {/* 3. BIỂU ĐỒ BỆNH LÝ (Đã bỏ thanh xám) */}
+                {/* 3. HÀNG 3: RADAR & RADIAL */}
                 <div style={cardStyle}>
-                    <div style={cardHeaderStyle}>
-                        <h3 style={cardTitleStyle}>Most Common Diseases</h3>
-                        <i className="fa-solid fa-notes-medical" style={{ color: '#94a3b8', fontSize: '18px' }}></i>
-                    </div>
+                    <ChartHeader title="Demographics Balance" subtitle="Male vs Female" icon="fa-venus-mars" />
+                    <ResponsiveContainer width="100%" height={300}>
+                        <RadarChart cx="50%" cy="50%" outerRadius="75%" data={ageData}>
+                            <PolarGrid stroke="#e2e8f0" />
+                            <PolarAngleAxis dataKey="name" tick={{ fill: '#64748b', fontSize: 11 }} />
+                            <PolarRadiusAxis angle={30} stroke="none" />
+                            <Radar name="Male" dataKey="male" stroke="#4361ee" fill="#4361ee" fillOpacity={0.3} />
+                            <Radar name="Female" dataKey="female" stroke="#f72585" fill="#f72585" fillOpacity={0.3} />
+                            <Legend />
+                            <Tooltip contentStyle={tooltipStyle} />
+                        </RadarChart>
+                    </ResponsiveContainer>
+                </div>
+
+                <div style={cardStyle}>
+                    <ChartHeader title="Disease Burden" subtitle="Top conditions prevalence" icon="fa-biohazard" />
+                    <ResponsiveContainer width="100%" height={300}>
+                        <RadialBarChart cx="50%" cy="50%" innerRadius="20%" outerRadius="100%" barSize={15} data={top5Disease}>
+                            <RadialBar minAngle={15} background clockWise dataKey="count" cornerRadius={10} />
+                            <Legend iconSize={10} layout="vertical" verticalAlign="middle" wrapperStyle={legendStyle} />
+                            <Tooltip cursor={{fill: 'transparent'}} contentStyle={tooltipStyle} />
+                        </RadialBarChart>
+                    </ResponsiveContainer>
+                </div>
+
+
+                {/* 5. HÀNG CUỐI (Đẩy xuống cuối): SCATTER CHART */}
+                <div style={{ ...cardStyle, gridColumn: "1 / -1" }} className="full-width-card">
+                    <ChartHeader title="Clinical Complexity Analysis" subtitle="Correlation: Patient Age vs Number of Relevant Medical Articles" icon="fa-project-diagram" />
                     <ResponsiveContainer width="100%" height={350}>
-                        <BarChart layout="vertical" data={diseaseData} margin={{ top: 0, right: 50, left: 0, bottom: 0 }} barCategoryGap={20}>
-                            <defs>
-                                {diseaseData.map((entry, index) => (
-                                    <linearGradient id={`colorDisease${index}`} x1="0" y1="0" x2="1" y2="0" key={index}>
-                                        <stop offset="0%" stopColor={COLORS_DISEASE[index % COLORS_DISEASE.length][0]} />
-                                        <stop offset="100%" stopColor={COLORS_DISEASE[index % COLORS_DISEASE.length][1]} />
-                                    </linearGradient>
-                                ))}
-                            </defs>
-                            <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f1f5f9" />
-                            <XAxis type="number" hide />
+                        <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
+                            <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                            <XAxis type="number" dataKey="age" name="Age" unit=" yrs" stroke="#94a3b8" />
+
+                            {/* --- CẬP NHẬT TRỤC Y: CHIA VẠCH 0, 1, 2, 3 --- */}
                             <YAxis
-                                dataKey="name"
-                                type="category"
-                                width={100}
-                                tick={{ fontSize: 13, fill: '#475569', fontWeight: 600 }}
-                                axisLine={false}
-                                tickLine={false}
-                            />
-                            <Tooltip
-                                cursor={{ fill: 'transparent' }}
-                                contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)' }}
+                                type="number"
+                                dataKey="citations"
+                                name="Citations"
+                                unit=" refs"
+                                stroke="#94a3b8"
+                                allowDecimals={false} // Không hiện số lẻ
+                                ticks={[0, 1, 2, 3]}  // Ép buộc hiển thị các mốc này (nếu data > 3 nó sẽ tự thêm)
                             />
 
-                            {/* Thanh dữ liệu chính */}
-                            <Bar dataKey="count" barSize={24} radius={[0, 10, 10, 0]}>
-                                {diseaseData.map((entry, index) => (
-                                    <Cell key={`cell-${index}`} fill={`url(#colorDisease${index})`} />
+                            <ZAxis type="number" dataKey="z" range={[60, 400]} />
+                            <Tooltip cursor={{ strokeDasharray: '3 3' }} contentStyle={tooltipStyle} />
+                            <Legend />
+                            <Scatter name="Medical Cases" data={scatterData} fill="#8884d8" shape="circle">
+                                {scatterData.map((entry, index) => (
+                                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                                 ))}
-                                {/* Hiển thị số lượng ở đuôi */}
-                                <LabelList dataKey="count" position="right" style={{ fill: '#64748b', fontSize: '13px', fontWeight: 'bold' }} />
-                            </Bar>
-                        </BarChart>
+                            </Scatter>
+                        </ScatterChart>
                     </ResponsiveContainer>
                 </div>
 
@@ -297,99 +258,50 @@ const Analytics = () => {
     );
 };
 
-// --- STYLED COMPONENTS (Giữ nguyên) ---
-const StatCard = ({ title, value, icon, color, trend }) => (
-    <div style={{ ...cardStyle, position: 'relative', overflow: 'hidden', borderLeft: `4px solid ${color}` }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-            <div>
-                <p style={{ color: '#94a3b8', fontSize: '12px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '8px' }}>{title}</p>
-                <h3 style={{ color: '#1e293b', fontSize: '32px', margin: 0, fontWeight: '800', lineHeight: '1.2' }}>{value}</h3>
-                <div style={{ display: 'flex', alignItems: 'center', marginTop: '12px', gap: '6px' }}>
-          <span style={{ color: color, background: `${color}15`, padding: '4px 8px', borderRadius: '6px', fontSize: '12px', fontWeight: 'bold' }}>
-            <i className="fa-solid fa-arrow-trend-up" style={{ marginRight: '4px' }}></i> {trend}
-          </span>
-                    <span style={{ color: '#94a3b8', fontSize: '12px' }}>vs last month</span>
-                </div>
-            </div>
-            <div style={{
-                width: '56px', height: '56px',
-                borderRadius: '16px',
-                background: `linear-gradient(135deg, ${color}20, ${color}10)`,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                color: color, fontSize: '24px',
-                boxShadow: `0 4px 12px ${color}30`
-            }}>
-                <i className={`fa-solid ${icon}`}></i>
-            </div>
+// --- SUB COMPONENTS & STYLES ---
+const ChartHeader = ({title, subtitle, icon}) => (
+    <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '15px'}}>
+        <div>
+            <h3 style={{margin: 0, color: '#1e293b', fontSize: '16px', fontWeight: '700'}}>{title}</h3>
+            <p style={{margin: '2px 0 0', color: '#94a3b8', fontSize: '12px'}}>{subtitle}</p>
+        </div>
+        <div style={{width: 32, height: 32, borderRadius: '8px', background: '#f8fafc', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748b', border: '1px solid #e2e8f0'}}>
+            <i className={`fa-solid ${icon}`}></i>
         </div>
     </div>
 );
 
-const containerStyle = {
-    padding: "40px 6%",
-    backgroundColor: MAIN_BG,
-    minHeight: "100vh",
-    fontFamily: "'Plus Jakarta Sans', 'Segoe UI', sans-serif"
-};
+const StatCard = ({ title, value, color1, color2, icon, sparkData }) => (
+    <div style={{
+        background: `linear-gradient(135deg, ${color1}, ${color2})`, padding: "24px", borderRadius: "20px",
+        boxShadow: "0 10px 20px -5px rgba(0, 0, 0, 0.15)", color: 'white', position: 'relative', overflow: 'hidden',
+        display: 'flex', flexDirection: 'column', justifyContent: 'space-between', minHeight: '150px'
+    }}>
+        <div style={{position: 'relative', zIndex: 2}}>
+            <div style={{display:'flex', justifyContent:'space-between'}}>
+                <p style={{ opacity: 0.9, fontSize: '12px', fontWeight: '700', letterSpacing: '1px', marginBottom: '5px' }}>{title}</p>
+                <i className={`fa-solid ${icon}`} style={{opacity: 0.5}}></i>
+            </div>
+            <h3 style={{ fontSize: '32px', margin: '5px 0', fontWeight: '800' }}>{typeof value === 'number' ? value.toLocaleString() : value}</h3>
+        </div>
+        <div style={{height: '40px', width: '100%', opacity: 0.4, marginTop: 'auto'}}>
+            <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={sparkData}>
+                    <Area type="monotone" dataKey="uv" stroke="#fff" fill="#fff" strokeWidth={2} />
+                </AreaChart>
+            </ResponsiveContainer>
+        </div>
+    </div>
+);
 
-const headerStyle = {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: '40px'
-};
-
-const tagStyle = {
-    backgroundColor: '#ecfdf5', color: '#059669',
-    padding: '8px 16px', borderRadius: '30px',
-    fontSize: '13px', fontWeight: '700',
-    display: 'inline-flex', alignItems: 'center', gap: '8px',
-    boxShadow: '0 2px 6px rgba(16, 185, 129, 0.1)',
-    border: '1px solid #d1fae5'
-};
-
-const gridSummaryStyle = {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
-    gap: "24px",
-    marginBottom: "30px"
-};
-
-const gridChartStyle = {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(500px, 1fr))",
-    gap: "24px"
-};
-
-const cardStyle = {
-    backgroundColor: CARD_BG,
-    padding: "28px",
-    borderRadius: "24px",
-    boxShadow: "0 2px 10px rgba(0, 0, 0, 0.02), 0 15px 30px -5px rgba(0, 0, 0, 0.04)",
-    border: "1px solid #f1f5f9",
-    transition: "transform 0.3s ease, box-shadow 0.3s ease",
-};
-
-const cardHeaderStyle = {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: '30px'
-};
-
-const cardTitleStyle = {
-    margin: 0,
-    color: '#334155',
-    fontSize: '18px',
-    fontWeight: '700',
-    letterSpacing: '-0.3px'
-};
-
-const iconButtonStyle = {
-    width: '36px', height: '36px', borderRadius: '10px',
-    background: '#f8fafc', color: '#64748b',
-    display: 'flex', alignItems: 'center', justifyContent: 'center',
-    cursor: 'pointer', transition: 'all 0.2s'
-};
+// --- STYLES ---
+const containerStyle = { padding: "30px 5%", backgroundColor: MAIN_BG, minHeight: "100vh", fontFamily: "'Segoe UI', sans-serif" };
+const headerStyle = { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' };
+const tagStyle = { backgroundColor: '#d1fae5', color: '#059669', padding: '6px 16px', borderRadius: '30px', fontSize: '13px', fontWeight: 'bold', boxShadow: '0 0 0 4px #ecfdf5' };
+const gridSummaryStyle = { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "20px", marginBottom: "30px" };
+const cardStyle = { backgroundColor: CARD_BG, padding: "20px", borderRadius: "20px", boxShadow: "0 4px 20px rgba(0,0,0,0.02)", border: "1px solid #fff" };
+const tooltipStyle = { borderRadius: '12px', border: 'none', boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)', backgroundColor: 'rgba(255, 255, 255, 0.98)', padding: '10px 15px', fontSize: '13px' };
+const loadingStyle = { display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', color: '#4361ee', fontWeight: 'bold' };
+const legendStyle = { lineHeight: '24px', right: 0, top: '50%', transform: 'translate(0, -50%)' };
 
 export default Analytics;

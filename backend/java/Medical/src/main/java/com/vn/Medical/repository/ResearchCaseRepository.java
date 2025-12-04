@@ -52,4 +52,21 @@ public interface ResearchCaseRepository extends JpaRepository<ResearchCase, Stri
             nativeQuery = true)
     List<Object[]> countByDiseaseCategory();
 
+    // Lấy cặp dữ liệu (Tuổi - Số lượng bài báo tham khảo) để vẽ Scatter Plot
+    @Query(value = "SELECT c.age, COUNT(r.article_id) " +
+            "FROM research_case c " +
+            "LEFT JOIN research_relevance r ON c.id = r.case_id " +
+            "WHERE c.age IS NOT NULL " +
+            "GROUP BY c.id, c.age " +
+            "HAVING COUNT(r.article_id) > 0",
+            nativeQuery = true)
+    List<Object[]> getAgeVsCitationCount();
+
+    // Thống kê phân bổ số lượng trích dẫn (Có bao nhiêu ca bệnh có 1 ref, 2 refs, 5 refs...?)
+    @Query(value = "SELECT ref_count, COUNT(*) FROM " +
+            "(SELECT case_id, COUNT(*) as ref_count FROM research_relevance GROUP BY case_id) as sub " +
+            "GROUP BY ref_count ORDER BY ref_count ASC",
+            nativeQuery = true)
+    List<Object[]> getCitationDistribution();
+
 }
