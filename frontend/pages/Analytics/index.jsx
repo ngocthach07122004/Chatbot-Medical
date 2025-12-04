@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import {
     BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
-    PieChart, Pie, Cell, ResponsiveContainer
+    PieChart, Pie, Cell, ResponsiveContainer,
 } from "recharts";
 import doctorApi from "../../services/api/doctorApi"; // Import api instance của bạn
 
@@ -41,19 +41,25 @@ const Analytics = () => {
 
     // --- CHUYỂN ĐỔI DỮ LIỆU CHO RECHARTS ---
 
-    // 1. Dữ liệu Giới tính (Pie Chart)
+    // Dữ liệu Giới tính (Pie Chart)
     const genderData = Object.keys(data.genderStats).map((key) => ({
         name: key === 'M' ? 'Male' : (key === 'F' ? 'Female' : key),
         value: data.genderStats[key],
     }));
 
-    // 2. Dữ liệu Độ tuổi (Bar Chart)
+    // Dữ liệu Độ tuổi (Bar Chart)
     // Sắp xếp thứ tự độ tuổi cho hợp lý
     const ageOrder = ['0-18', '18-40', '41-60', '60+'];
     const ageData = ageOrder.map((key) => ({
         name: key,
         count: data.ageStats[key] || 0,
     }));
+
+    // Convert data bệnh lý
+    const diseaseData = data.diseaseStats ? Object.keys(data.diseaseStats).map(key => ({
+        name: key,
+        count: data.diseaseStats[key]
+    })) : [];
 
     return (
         <div style={{ padding: "40px", background: "#f5f7fa", minHeight: "calc(100vh - 72px)" }}>
@@ -130,6 +136,20 @@ const Analytics = () => {
                             <Tooltip />
                             <Legend verticalAlign="bottom" height={36}/>
                         </PieChart>
+                    </ResponsiveContainer>
+                </div>
+
+                <div style={{ marginTop: "30px", ...cardStyle, flexDirection: 'column', alignItems: 'stretch' }}>
+                    <h3 style={{ textAlign: "center", color: "#444" }}>Common Disease Categories</h3>
+                    <ResponsiveContainer width="100%" height={300}>
+                        <BarChart layout="vertical" data={diseaseData} margin={{ left: 20 }}>
+                            <CartesianGrid strokeDasharray="3 3" />
+                            <XAxis type="number" />
+                            <YAxis dataKey="name" type="category" width={100} />
+                            <Tooltip cursor={{fill: 'transparent'}} />
+                            <Legend />
+                            <Bar dataKey="count" fill="#82ca9d" name="Cases Count" barSize={40} />
+                        </BarChart>
                     </ResponsiveContainer>
                 </div>
             </div>
