@@ -253,9 +253,9 @@ def finalize_database():
         print(f"Error finalizing database: {e}")
 
 if __name__ == "__main__":
-    init_database()
+    # init_database()
     import_corpus()
     import_patients()
     update_search_vector()
-    finalize_database()
+    # finalize_database()
     print("\n--- ALL TASKS COMPLETED ---")

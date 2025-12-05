@@ -51,23 +51,40 @@ public class HistoryChatService {
     public HistoryChat createHistoryChat(HistoryChatRequest request) {
 
         // get user question from request JSON
-        // { "data": { "question": "test test test cau hoi?" } }
+        // Supports both "question" and "user_question" fields for flexibility
         String userQuestion = "";
         if (request.getData().has("question")) {
             userQuestion = request.getData().get("question").asText();
+        } else if (request.getData().has("user_question")) {
+            userQuestion = request.getData().get("user_question").asText();
         } else {
-            // falllback
+            // fallback
             userQuestion = request.getData().toString();
         }
 
-        // get bot answer from OpenAI
-        String botAnswer = callOpenAI(userQuestion);
+        // Check if bot_answer is already provided (from Clinical QA API)
+        // Only call OpenAI if not already provided
+        String botAnswer;
+        if (request.getData().has("bot_answer") && !request.getData().get("bot_answer").asText().isEmpty()) {
+            botAnswer = request.getData().get("bot_answer").asText();
+        } else {
+            // get bot answer from OpenAI as fallback
+            botAnswer = callOpenAI(userQuestion);
+        }
 
         // create conversation JSON
         ObjectNode conversationData = objectMapper.createObjectNode();
         conversationData.put("user_question", userQuestion);
         conversationData.put("bot_answer", botAnswer);
         conversationData.put("timestamp", LocalDateTime.now().toString());
+        
+        // Preserve references and articles if provided
+        if (request.getData().has("references")) {
+            conversationData.set("references", request.getData().get("references"));
+        }
+        if (request.getData().has("articles")) {
+            conversationData.set("articles", request.getData().get("articles"));
+        }
 
         // save DB HistoryChat
         HistoryChat historyChat = new HistoryChat();
