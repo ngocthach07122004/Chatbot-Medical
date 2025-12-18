@@ -1,0 +1,312 @@
+# 🏥 Medical Chatbot - Intelligent Healthcare Chatbot System
+
+> An AI-powered chatbot to assist doctors in medical information retrieval and patient management, integrated with PubMedBERT and Clinical QA API.
+
+## 📋 Table of Contents
+
+- [Introduction](#introduction)
+- [Features](#features)
+- [System Architecture](#system-architecture)
+- [Tech Stack](#tech-stack)
+- [Project Structure](#project-structure)
+- [Installation](#installation)
+- [Usage Guide](#usage-guide)
+- [API Documentation](#api-documentation)
+- [Contributing](#contributing)
+
+---
+
+## 🎯 Introduction
+
+**Medical Chatbot** is an intelligent chatbot system designed to assist healthcare professionals in:
+- Retrieving medical information from the PubMed database
+- Managing patient information and chat history
+- Receiving AI-generated answers based on cited scientific articles
+
+The system utilizes **PubMedBERT** model for processing and retrieving medical information, ensuring high accuracy and reliability for professional users.
+
+---
+
+## ✨ Features
+
+### 🤖 AI Chatbot
+- Answer medical questions with citations from PubMed
+- Display responses in professional Markdown format
+- Link to original research articles
+
+### 👨‍⚕️ Patient Management
+- View doctor's patient list
+- Quick patient search functionality
+- Store conversation history per patient
+
+### 📚 Medical Document Retrieval
+- Integrated Clinical QA API
+- Article retrieval from Corpus API
+- Display article details with PMID
+
+### 🔐 Authentication & Security
+- Login/Registration system
+- Doctor profile management
+- User authorization
+
+---
+
+## 🏗️ System Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                         Frontend (React + Vite)                 │
+│                    - Chatbot UI                                 │
+│                    - Patient Management                         │
+│                    - Doctor Profile                             │
+└───────────────────────────────┬─────────────────────────────────┘
+                                │
+            ┌───────────────────┼───────────────────┐
+            │                   │                   │
+            ▼                   ▼                   ▼
+    ┌───────────────┐  ┌───────────────┐  ┌───────────────────┐
+    │ Backend (Java)│  │ Backend (Go)  │  │   AI Service      │
+    │ - Doctor API  │  │ - Patient API │  │ - Clinical QA API │
+    │ - Chat API    │  │ - Data API    │  │ - Corpus API      │
+    └───────┬───────┘  └───────┬───────┘  └─────────┬─────────┘
+            │                  │                     │
+            ▼                  ▼                     ▼
+    ┌───────────────┐  ┌───────────────┐  ┌───────────────────┐
+    │  PostgreSQL   │  │  PostgreSQL   │  │  PubMedBERT +     │
+    │  (Doctor DB)  │  │  (Patient DB) │  │  Milvus Vector DB │
+    └───────────────┘  └───────────────┘  └───────────────────┘
+            │                  │
+            └────────┬─────────┘
+                     │
+              ┌──────▼──────┐
+              │ Apache Kafka│
+              │ (Messaging) │
+              └─────────────┘
+```
+
+---
+
+## 🛠️ Tech Stack
+
+### Frontend
+| Technology | Version | Description |
+|------------|---------|-------------|
+| React | 18.x | UI Library |
+| Vite | 5.x | Build Tool |
+| SCSS Modules | - | Styling |
+| Axios | - | HTTP Client |
+| React Router | - | Routing |
+| React Markdown | - | Markdown Rendering |
+
+### Backend
+| Technology | Version | Description |
+|------------|---------|-------------|
+| Java Spring Boot | 3.x | Main Backend |
+| Go | 1.21+ | Microservice |
+| PostgreSQL | 16 | Database |
+| Apache Kafka | 8.1.0 | Message Queue |
+
+### AI/ML
+| Technology | Description |
+|------------|-------------|
+| PubMedBERT | Medical NLP Model |
+| Bi-Encoder | Dual-encoder Architecture |
+| Milvus | Vector Database |
+| PyTorch | Deep Learning Framework |
+| Transformers (HuggingFace) | NLP Library |
+
+### DevOps
+| Technology | Description |
+|------------|-------------|
+| Docker & Docker Compose | Containerization |
+| pgAdmin | Database Management |
+
+---
+
+## 📁 Project Structure
+
+```
+ChatBotMedical/
+├── frontend/                 # React Frontend Application
+│   ├── components/           # Reusable components
+│   ├── pages/                # Page components
+│   │   ├── Chatbot/          # Chatbot interface
+│   │   ├── Login/            # Authentication
+│   │   └── Profile/          # User profile
+│   ├── services/             # API services
+│   │   ├── chatServiceApi.js
+│   │   ├── clinicalQaService.js
+│   │   └── corpusService.js
+│   └── layouts/              # Layout components
+│
+├── backend/
+│   ├── java/Medical/         # Spring Boot Backend
+│   │   ├── controller/       # REST Controllers
+│   │   ├── service/          # Business Logic
+│   │   ├── entity/           # JPA Entities
+│   │   ├── repository/       # Data Access
+│   │   └── dto/              # Data Transfer Objects
+│   └── go/                   # Go Microservice
+│
+├── chatBot/                  # AI/ML Training Module
+│   ├── model.py              # BiEncoder Model
+│   ├── train.py              # Training Script
+│   ├── evaluate_par.py       # Evaluation
+│   ├── data_loader.py        # Data Processing
+│   ├── retrieve.py           # Document Retrieval
+│   └── insert_to_milvus.py   # Vector DB Insertion
+│
+├── database/                 # Database Scripts
+├── handleData/               # Data Processing Utilities
+├── docker-compose.yml        # Docker Configuration
+├── .env.example              # Environment Variables Template
+└── README.md                 # This File
+```
+
+---
+
+## 🚀 Installation
+
+### Prerequisites
+- Docker & Docker Compose
+- Node.js 18+
+- Java 17+
+- Python 3.9+
+- Go 1.21+
+
+### Step 1: Clone Repository
+```bash
+git clone https://github.com/your-username/ChatBotMedical.git
+cd ChatBotMedical
+```
+
+### Step 2: Configure Environment
+```bash
+cp .env.example .env
+# Edit .env file with required configurations
+```
+
+### Step 3: Start Services with Docker
+```bash
+docker-compose up -d
+```
+
+### Step 4: Install Frontend
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+### Step 5: Start Backend (Java)
+```bash
+cd backend/java/Medical
+./mvnw spring-boot:run
+```
+
+### Step 6: Start Backend (Go)
+```bash
+cd backend/go
+go run main.go
+```
+
+---
+
+## 📖 Usage Guide
+
+### Login
+1. Navigate to `http://localhost:5173`
+2. Login with doctor credentials
+
+### Using the Chatbot
+1. Select a patient from the left sidebar
+2. Type a medical question in the chat input
+3. AI will respond with citations from PubMed
+4. Click on PMID to view article details
+
+### Patient Management
+- Search patients using the search bar
+- View chat history for each patient
+- Chat history is automatically saved
+
+---
+
+## 📡 API Documentation
+
+### Clinical QA API
+```http
+POST /chat
+Content-Type: application/json
+
+{
+  "query": "What are the symptoms of diabetes?",
+  "top_k": 5
+}
+```
+
+### Corpus API
+```http
+POST /api/corpus
+Content-Type: application/json
+
+{
+  "pmids": ["12345678", "87654321"]
+}
+```
+
+### Chat History API
+```http
+GET /api/history/{doctorId}/{patientId}
+POST /api/chat/save
+```
+
+---
+
+## 🧠 AI Model
+
+### Patient Article Retrieval (PAR)
+The system uses a **Bi-Encoder** architecture with PubMedBERT:
+
+- **Query Encoder**: Encodes user questions
+- **Document Encoder**: Encodes medical articles
+- **Loss Function**: InfoNCE with in-batch negatives
+- **Similarity**: Cosine similarity on L2-normalized embeddings
+
+### Model Performance
+| Metric | Score |
+|--------|-------|
+| MRR | 0.30 - 0.45 |
+| Recall@10 | 0.40 - 0.60 |
+| NDCG@10 | 0.35 - 0.50 |
+
+---
+
+## 👥 Contributing
+
+Contributions are welcome! Please:
+
+1. Fork the repository
+2. Create a new branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+---
+
+## 📄 License
+
+This project is distributed under the MIT License. See `LICENSE` for more information.
+
+---
+
+## 📞 Contact
+
+- **Author**: Huynh Thach
+- **Email**: [your-email@example.com]
+- **Project Link**: [https://github.com/your-username/ChatBotMedical](https://github.com/your-username/ChatBotMedical)
+
+---
+
+<p align="center">
+  Made with ❤️ for Healthcare Professionals
+</p>
