@@ -1,3 +1,48 @@
+# Website UI
+
+
+<img width="1511" height="735" alt="web4" src="https://github.com/user-attachments/assets/ef2d5161-673a-4eba-8790-6464eda9f721" />
+
+
+<img width="1511" height="732" alt="web6" src="https://github.com/user-attachments/assets/d6f11c90-1a8c-4c23-af42-320998f47927" />
+
+
+<img width="1512" height="734" alt="web5" src="https://github.com/user-attachments/assets/c055489c-c379-44b0-89cd-a53c4af844cb" />
+
+<img width="1512" height="733" alt="web7" src="https://github.com/user-attachments/assets/1613b444-5a2f-4180-80ea-ce8c2578c565" />
+
+<img width="1512" height="731" alt="web12" src="https://github.com/user-attachments/assets/5b504e07-33fc-4b59-a055-97b5c31b8b6a" />
+
+<img width="1509" height="728" alt="web13" src="https://github.com/user-attachments/assets/4857e67a-80e3-432d-a451-0763508883dd" />
+
+
+
+
+<img width="1512" height="736" alt="web8" src="https://github.com/user-attachments/assets/d7ff0e7f-17ca-489c-aa10-dd4e20fe89c8" />
+
+
+<img width="1512" height="734" alt="web9" src="https://github.com/user-attachments/assets/90514f2b-f6a9-44c3-9db1-571825df5b1d" />
+
+
+<img width="1512" height="734" alt="web10" src="https://github.com/user-attachments/assets/6bc048fd-43e0-4960-b877-977497270f37" />
+
+
+<img width="1512" height="736" alt="web11" src="https://github.com/user-attachments/assets/b9fefa76-7c01-433b-9673-67590ce4364a" />
+
+
+<img width="1511" height="734" alt="web1" src="https://github.com/user-attachments/assets/332cf777-8e6c-4892-8150-ebf19f27f10f" />
+
+
+<img width="1512" height="733" alt="web2" src="https://github.com/user-attachments/assets/17591d48-4d95-4a2c-b6e7-d225dd282c9e" />
+
+
+
+<img width="1512" height="690" alt="web3" src="https://github.com/user-attachments/assets/66476ccc-5a67-419f-9764-ea61a157fa66" />
+
+
+
+
+
 # 🏥 Medical Chatbot - Intelligent Healthcare Chatbot System
 
 > An AI-powered chatbot to assist doctors in medical information retrieval and patient management, integrated with PubMedBERT and Clinical QA API.
